@@ -53,8 +53,6 @@ class SyphtClient(object):
             'fieldSet': fieldset
         }, files=files, headers=headers).json()
 
-        print(result)
-
         if 'fileId' not in result:
             raise Exception('Upload failed with response: {}'.format('\n'+json.dumps(result, indent=2)))
 
