@@ -66,3 +66,22 @@ class SyphtClient(object):
             return None
 
         return {r['name']: r['value'] for r in result['results']['fields']}
+
+    def update_specification(self, specification, endpoint=None):
+        endpoint = urljoin(endpoint or self.base_endpoint, 'validate/specifications')
+        headers = self._get_headers()
+        headers['Accept'] = 'application/json'
+        headers['Content-Type'] = 'application/json'
+        return requests.post(endpoint, data=json.dumps(specification), headers=headers).json()
+
+    def submit_task(self, doc_id, company_id, specification, replication=1, endpoint=None):
+        endpoint = urljoin(endpoint or self.base_endpoint, 'validate/tasks')
+        headers = self._get_headers()
+        headers['Accept'] = 'application/json'
+        headers['Content-Type'] = 'application/json'
+        return requests.post(endpoint, data=json.dumps({
+            "doc_id": doc_id,
+            "company_id": company_id,
+            "specification": specification,
+            "replication": replication
+        }), headers=headers).json()
