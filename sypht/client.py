@@ -42,16 +42,20 @@ class SyphtClient(object):
         })
         return headers
 
-    def upload(self, file, fieldset, endpoint=None):
+    def upload(self, file, fieldset, tags=None, endpoint=None):
         endpoint = urljoin(endpoint or self.base_endpoint, 'fileupload')
         headers = self._get_headers()
         files = {
             'fileToUpload': file
         }
 
-        result = requests.post(endpoint, data={
+        data = {
             'fieldSet': fieldset
-        }, files=files, headers=headers).json()
+        }
+        if tag:
+            data['tags'] = tags
+
+        result = requests.post(endpoint, data=data, files=files, headers=headers).json()
 
         if 'fileId' not in result:
             raise Exception('Upload failed with response: {}'.format('\n'+json.dumps(result, indent=2)))
