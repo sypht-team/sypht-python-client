@@ -15,6 +15,7 @@ class ResultStatus:
 class Fieldsets:
     INVOICE_BPAY_PAYMENT = 'invoiceBpayPayment'
     INVOICE_ELECTRICITY = 'invoiceElectricity'
+    INVOICE_ACCOUNTS_PAYABLE = 'invoiceAccountsPayable'
 
 
 class SyphtClient(object):
@@ -52,7 +53,7 @@ class SyphtClient(object):
         data = {
             'fieldSet': fieldset
         }
-        if tag:
+        if tags:
             data['tags'] = tags
 
         result = requests.post(endpoint, data=data, files=files, headers=headers).json()
