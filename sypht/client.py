@@ -72,6 +72,13 @@ class SyphtClient(object):
 
         return {r['name']: r['value'] for r in result['results']['fields']}
 
+    def get_annotations(self, docId, endpoint=None):
+        endpoint = urljoin(endpoint or self.base_endpoint, ('/validate/annotations?docId='+docId))
+        headers = self._get_headers()
+        headers['Accept'] = 'application/json'
+        headers['Content-Type'] = 'application/json'
+        return requests.get(endpoint, headers=headers).json()
+
     def update_specification(self, specification, endpoint=None):
         endpoint = urljoin(endpoint or self.base_endpoint, 'validate/specifications')
         headers = self._get_headers()
