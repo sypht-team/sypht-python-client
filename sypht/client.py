@@ -1,3 +1,4 @@
+import os
 import six
 import requests
 import json
@@ -19,7 +20,19 @@ class Fieldsets:
 
 
 class SyphtClient(object):
-    def __init__(self, client_id, client_secret, base_endpoint='https://api.sypht.com', auth_endpoint=None):
+    API_ENV_KEY = 'SYPHT_API_KEY'
+
+    def __init__(self, client_id=None, client_secret=None, base_endpoint='https://api.sypht.com', auth_endpoint=None):
+        if client_id is None and client_secret is None:
+            env_key = os.environ.get(self.API_ENV_KEY)
+            key_parts = env_key.split(':') if env_key else []
+            if len(key_parts) != 2:
+                raise ValueError('Invalid API key configured via environment: ' + self.API_ENV_KEY)
+            client_id, client_secret = key_parts
+
+        if client_id is None or client_secret is None:
+            raise ValueError('Client credentials missing')
+
         self.base_endpoint = base_endpoint
         self._access_token = self._authenticate(client_id, client_secret, auth_endpoint or base_endpoint)
 

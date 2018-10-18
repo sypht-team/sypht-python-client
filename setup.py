@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-__version__ = '0.1.4'
+__version__ = '0.1.5'
 __pkg_name__ = 'sypht'
 
 setup(
@@ -10,7 +10,11 @@ setup(
     author='Sypht Pty Ltd.',
     packages = find_packages(),
     url = 'https://sypht.com',
-    entry_points = {},
+    entry_points={
+        'console_scripts': [
+            'sypht = sypht.__main__:main'
+        ]
+    },
     classifiers=[
         'Environment :: Console',
         'Programming Language :: Python :: 2.7',
