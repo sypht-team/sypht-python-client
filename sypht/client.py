@@ -17,6 +17,7 @@ class Fieldsets:
     INVOICE_BPAY_PAYMENT = 'invoiceBpayPayment'
     INVOICE_ELECTRICITY = 'invoiceElectricity'
     INVOICE_ACCOUNTS_PAYABLE = 'invoiceAccountsPayable'
+    MOBILE_BPAY_PAYMENT = 'mobileBpayPayment'
 
 
 class SyphtClient(object):
