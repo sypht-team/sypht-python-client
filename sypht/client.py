@@ -100,14 +100,18 @@ class SyphtClient(object):
         headers['Content-Type'] = 'application/json'
         return requests.post(endpoint, data=json.dumps(specification), headers=headers).json()
 
-    def submit_task(self, doc_id, company_id, specification, replication=1, endpoint=None):
+    def submit_task(self, doc_id, company_id, specification, replication=1, priority=None, endpoint=None):
         endpoint = urljoin(endpoint or self.base_endpoint, 'validate/tasks')
         headers = self._get_headers()
         headers['Accept'] = 'application/json'
         headers['Content-Type'] = 'application/json'
-        return requests.post(endpoint, data=json.dumps({
+        task = {
             "doc_id": doc_id,
             "company_id": company_id,
             "specification": specification,
             "replication": replication
-        }), headers=headers).json()
+        }
+        if priority is not None:
+            task["priority"] = priority
+
+        return requests.post(endpoint, data=json.dumps(task), headers=headers).json()
