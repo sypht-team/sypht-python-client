@@ -57,7 +57,7 @@ class SyphtClient(object):
         })
         return headers
 
-    def upload(self, file, fieldset, tags=None, endpoint=None):
+    def upload(self, file, fieldset, tags=None, endpoint=None, **requests_params):
         endpoint = urljoin(endpoint or self.base_endpoint, 'fileupload')
         headers = self._get_headers()
         files = {
@@ -70,23 +70,23 @@ class SyphtClient(object):
         if tags:
             data['tags'] = tags
 
-        result = requests.post(endpoint, data=data, files=files, headers=headers).json()
+        result = requests.post(endpoint, data=data, files=files, headers=headers, **requests_params).json()
 
         if 'fileId' not in result:
             raise Exception('Upload failed with response: {}'.format('\n'+json.dumps(result, indent=2)))
 
         return result['fileId']
 
-    def fetch_results(self, file_id, endpoint=None):
+    def fetch_results(self, file_id, endpoint=None, **requests_params):
         endpoint = urljoin(endpoint or self.base_endpoint, 'result/final/'+file_id)
-        result = requests.get(endpoint, headers=self._get_headers()).json()
+        result = requests.get(endpoint, headers=self._get_headers(), **requests_params).json()
 
         if result['status'] != ResultStatus.FINALISED:
             return None
 
         return {r['name']: r['value'] for r in result['results']['fields']}
 
-    def get_annotations(self, doc_id=None, task_id=None, user_id=None, specification=None, endpoint=None):
+    def get_annotations(self, doc_id=None, task_id=None, user_id=None, specification=None, endpoint=None, **requests_params):
         if doc_id is None and task_id is None and specification is None:
             raise ValueError('You must filter annotations by doc, task or specification')
 
@@ -104,16 +104,16 @@ class SyphtClient(object):
         headers = self._get_headers()
         headers['Accept'] = 'application/json'
         headers['Content-Type'] = 'application/json'
-        return requests.get(endpoint, headers=headers).json()
+        return requests.get(endpoint, headers=headers, **requests_params).json()
 
-    def update_specification(self, specification, endpoint=None):
+    def update_specification(self, specification, endpoint=None, **requests_params):
         endpoint = urljoin(endpoint or self.base_endpoint, 'validate/specifications')
         headers = self._get_headers()
         headers['Accept'] = 'application/json'
         headers['Content-Type'] = 'application/json'
-        return requests.post(endpoint, data=json.dumps(specification), headers=headers).json()
+        return requests.post(endpoint, data=json.dumps(specification), headers=headers, **requests_params).json()
 
-    def submit_task(self, doc_id, company_id, specification, replication=1, priority=None, endpoint=None):
+    def submit_task(self, doc_id, company_id, specification, replication=1, priority=None, endpoint=None, **requests_params):
         endpoint = urljoin(endpoint or self.base_endpoint, 'validate/tasks')
         headers = self._get_headers()
         headers['Accept'] = 'application/json'
@@ -127,4 +127,4 @@ class SyphtClient(object):
         if priority is not None:
             task["priority"] = priority
 
-        return requests.post(endpoint, data=json.dumps(task), headers=headers).json()
+        return requests.post(endpoint, data=json.dumps(task), headers=headers, **requests_params).json()

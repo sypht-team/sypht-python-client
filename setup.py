@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-__version__ = '0.1.7'
+__version__ = '0.1.8'
 __pkg_name__ = 'sypht'
 
 setup(
@@ -22,7 +22,7 @@ setup(
         'Topic :: Scientific/Engineering :: Artificial Intelligence'
     ],
     install_requires=[
-        'requests==2.19.1',
+        'requests==2.20.1',
         'six==1.11.0'
     ]
 )
