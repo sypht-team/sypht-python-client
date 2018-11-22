@@ -33,7 +33,8 @@ class Extract(object):
                        choices=[
                            Fieldsets.INVOICE_BPAY_PAYMENT,
                            Fieldsets.INVOICE_ELECTRICITY,
-                           Fieldsets.INVOICE_ACCOUNTS_PAYABLE
+                           Fieldsets.INVOICE_ACCOUNTS_PAYABLE,
+                           Fieldsets.MOBILE_BPAY_PAYMENT
                        ])
         p.set_defaults(cls=cls)
         return p
