@@ -8,6 +8,8 @@ if six.PY2:
 else:
     from urllib.parse import urljoin
 
+SYPHT_API_BASE_ENDPOINT = 'https://api.sypht.com'
+
 
 class ResultStatus:
     FINALISED = 'FINALISED'
@@ -24,7 +26,9 @@ class Fieldsets:
 class SyphtClient(object):
     API_ENV_KEY = 'SYPHT_API_KEY'
 
-    def __init__(self, client_id=None, client_secret=None, base_endpoint='https://api.sypht.com', auth_endpoint=None):
+    def __init__(self, client_id=None, client_secret=None, base_endpoint=None, auth_endpoint=None):
+        self.base_endpoint = base_endpoint if base_endpoint is not None else SYPHT_API_BASE_ENDPOINT
+
         if client_id is None and client_secret is None:
             env_key = os.environ.get(self.API_ENV_KEY)
             key_parts = env_key.split(':') if env_key else []
@@ -35,8 +39,7 @@ class SyphtClient(object):
         if client_id is None or client_secret is None:
             raise ValueError('Client credentials missing')
 
-        self.base_endpoint = base_endpoint
-        self._access_token = self._authenticate(client_id, client_secret, auth_endpoint or base_endpoint)
+        self._access_token = self._authenticate(client_id, client_secret, auth_endpoint or self.base_endpoint)
 
     @staticmethod
     def _authenticate(client_id, client_secret, audience):
