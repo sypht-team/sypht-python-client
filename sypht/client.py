@@ -58,7 +58,7 @@ class SyphtClient(object):
         })
         return headers
 
-    def upload(self, file, fieldset, tags=None, endpoint=None, **requests_params):
+    def upload(self, file, fieldset, tags=None, endpoint=None, options=None, **requests_params):
         endpoint = urljoin(endpoint or self.base_endpoint, 'fileupload')
         headers = self._get_headers()
         files = {
@@ -70,6 +70,8 @@ class SyphtClient(object):
         }
         if tags:
             data['tags'] = tags
+        if options is not None:
+            data['workflowOptions'] = json.dumps(options)
 
         result = requests.post(endpoint, data=data, files=files, headers=headers, **requests_params).json()
 
