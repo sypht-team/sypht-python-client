@@ -93,9 +93,6 @@ class SyphtClient(object):
         return {r['name']: r['value'] for r in result['results']['fields']}
 
     def get_annotations(self, doc_id=None, task_id=None, user_id=None, specification=None, from_date=None, to_date=None, endpoint=None, **requests_params):
-        if doc_id is None and task_id is None and specification is None:
-            raise ValueError('You must filter annotations by doc, task or specification')
-
         filters = []
         if doc_id is not None:
             filters.append('docId='+doc_id)
