@@ -92,7 +92,7 @@ class SyphtClient(object):
 
         return {r['name']: r['value'] for r in result['results']['fields']}
 
-    def get_annotations(self, doc_id=None, task_id=None, user_id=None, specification=None, endpoint=None, **requests_params):
+    def get_annotations(self, doc_id=None, task_id=None, user_id=None, specification=None, from_date=None, to_date=None, endpoint=None, **requests_params):
         if doc_id is None and task_id is None and specification is None:
             raise ValueError('You must filter annotations by doc, task or specification')
 
@@ -105,6 +105,10 @@ class SyphtClient(object):
             filters.append('userId='+user_id)
         if specification is not None:
             filters.append('specification='+specification)
+        if from_date is not None:
+            filters.append('fromDate='+from_date)
+        if to_date is not None:
+            filters.append('toDate='+to_date)
 
         endpoint = urljoin(endpoint or self.base_endpoint, ('/validate/annotations?'+'&'.join(filters)))
         headers = self._get_headers()
