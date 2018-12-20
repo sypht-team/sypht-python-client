@@ -43,7 +43,7 @@ class SyphtClient(object):
 
     @staticmethod
     def _authenticate(client_id, client_secret, audience):
-        result = requests.post('https://syphen.au.auth0.com/oauth/token', data={
+        result = requests.post('https://login.sypht.com/oauth/token', data={
             'client_id': client_id,
             'client_secret': client_secret,
             'audience': audience,
