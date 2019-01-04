@@ -9,7 +9,7 @@ else:
     from urllib.parse import urljoin
 
 SYPHT_API_BASE_ENDPOINT = 'https://api.sypht.com'
-
+SYPHT_AUTH_ENDPOINT = 'https://login.sypht.com/oauth/token'
 
 class ResultStatus:
     FINALISED = 'FINALISED'
@@ -32,18 +32,22 @@ class SyphtClient(object):
         if client_id is None and client_secret is None:
             env_key = os.environ.get(self.API_ENV_KEY)
             key_parts = env_key.split(':') if env_key else []
-            if len(key_parts) != 2:
-                raise ValueError('Invalid API key configured via environment: ' + self.API_ENV_KEY)
+            if not env_key:
+                raise ValueError('Missing API key configuration. Add ' + self.API_ENV_KEY + ' to the environment or ' +
+                                 'directly pass client_id and client_secret parameters to the client constructor.')
+            elif env_key and len(key_parts) != 2:
+                raise ValueError('Invalid ' + self.API_ENV_KEY + ' environment variable configured')
             client_id, client_secret = key_parts
 
         if client_id is None or client_secret is None:
             raise ValueError('Client credentials missing')
 
-        self._access_token = self._authenticate(client_id, client_secret, auth_endpoint or self.base_endpoint)
+        self._access_token = self._authenticate(client_id, client_secret, audience=self.base_endpoint, endpoint=auth_endpoint)
 
     @staticmethod
-    def _authenticate(client_id, client_secret, audience):
-        result = requests.post('https://login.sypht.com/oauth/token', data={
+    def _authenticate(client_id, client_secret, audience, endpoint=None):
+        endpoint = endpoint or SYPHT_AUTH_ENDPOINT
+        result = requests.post(endpoint, data={
             'client_id': client_id,
             'client_secret': client_secret,
             'audience': audience,
