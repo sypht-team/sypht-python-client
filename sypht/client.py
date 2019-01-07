@@ -1,7 +1,8 @@
-import os
-import six
-import requests
 import json
+import os
+
+import requests
+import six
 
 if six.PY2:
     from urlparse import urljoin
@@ -10,6 +11,7 @@ else:
 
 SYPHT_API_BASE_ENDPOINT = 'https://api.sypht.com'
 SYPHT_AUTH_ENDPOINT = 'https://login.sypht.com/oauth/token'
+
 
 class ResultStatus:
     FINALISED = 'FINALISED'
@@ -27,7 +29,13 @@ class SyphtClient(object):
     API_ENV_KEY = 'SYPHT_API_KEY'
 
     def __init__(self, client_id=None, client_secret=None, base_endpoint=None, auth_endpoint=None):
-        self.base_endpoint = base_endpoint if base_endpoint is not None else SYPHT_API_BASE_ENDPOINT
+        """
+        :param client_id: Your Sypht-provided OAuth client_id.
+        :param client_secret: Your Sypht-provided OAuth client_secret.
+        :param base_endpoint: Sypht API endpoint. Default: `https://api.sypht.com`.
+        :param auth_endpoint: Sypht authentication endpoint. Default: `https://login.sypht.com/oauth/token`.
+        """
+        self.base_endpoint = base_endpoint or os.environ.get('SYPHT_API_BASE_ENDPOINT', SYPHT_API_BASE_ENDPOINT)
 
         if client_id is None and client_secret is None:
             env_key = os.environ.get(self.API_ENV_KEY)
@@ -46,7 +54,7 @@ class SyphtClient(object):
 
     @staticmethod
     def _authenticate(client_id, client_secret, audience, endpoint=None):
-        endpoint = endpoint or SYPHT_AUTH_ENDPOINT
+        endpoint = endpoint or os.environ.get('SYPHT_AUTH_ENDPOINT', SYPHT_AUTH_ENDPOINT)
         result = requests.post(endpoint, data={
             'client_id': client_id,
             'client_secret': client_secret,
@@ -83,12 +91,12 @@ class SyphtClient(object):
         result = requests.post(endpoint, data=data, files=files, headers=headers, **requests_params).json()
 
         if 'fileId' not in result:
-            raise Exception('Upload failed with response: {}'.format('\n'+json.dumps(result, indent=2)))
+            raise Exception('Upload failed with response: {}'.format('\n' + json.dumps(result, indent=2)))
 
         return result['fileId']
 
     def fetch_results(self, file_id, endpoint=None, **requests_params):
-        endpoint = urljoin(endpoint or self.base_endpoint, 'result/final/'+file_id)
+        endpoint = urljoin(endpoint or self.base_endpoint, 'result/final/' + file_id)
         result = requests.get(endpoint, headers=self._get_headers(), **requests_params).json()
 
         if result['status'] != ResultStatus.FINALISED:
@@ -99,19 +107,19 @@ class SyphtClient(object):
     def get_annotations(self, doc_id=None, task_id=None, user_id=None, specification=None, from_date=None, to_date=None, endpoint=None, **requests_params):
         filters = []
         if doc_id is not None:
-            filters.append('docId='+doc_id)
+            filters.append('docId=' + doc_id)
         if task_id is not None:
-            filters.append('taskId='+task_id)
+            filters.append('taskId=' + task_id)
         if user_id is not None:
-            filters.append('userId='+user_id)
+            filters.append('userId=' + user_id)
         if specification is not None:
-            filters.append('specification='+specification)
+            filters.append('specification=' + specification)
         if from_date is not None:
-            filters.append('fromDate='+from_date)
+            filters.append('fromDate=' + from_date)
         if to_date is not None:
-            filters.append('toDate='+to_date)
+            filters.append('toDate=' + to_date)
 
-        endpoint = urljoin(endpoint or self.base_endpoint, ('/validate/annotations?'+'&'.join(filters)))
+        endpoint = urljoin(endpoint or self.base_endpoint, ('/validate/annotations?' + '&'.join(filters)))
         headers = self._get_headers()
         headers['Accept'] = 'application/json'
         headers['Content-Type'] = 'application/json'
