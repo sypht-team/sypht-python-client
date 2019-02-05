@@ -152,9 +152,7 @@ class SyphtClient(object):
         data = {
             "fields": [{
                 'id': field,
-                'source': {
-                    'type': 'external'
-                },
+                'origin': 'external',
                 'type': 'simple',
                 'data': {
                     'value': value
