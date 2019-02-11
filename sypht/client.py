@@ -150,9 +150,9 @@ class SyphtClient(object):
 
     def set_company_annotations(self, doc_id, annotations, company_id=None, endpoint=None):
         data = {
-            "fields": [{
+            'origin': 'external',
+            'fields': [{
                 'id': field,
-                'origin': 'external',
                 'type': 'simple',
                 'data': {
                     'value': value
