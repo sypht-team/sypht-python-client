@@ -118,15 +118,15 @@ class SyphtClient(object):
 
         return result['fileId']
 
-    def fetch_results(self, file_id, endpoint=None):
+    def fetch_results(self, file_id, verbose=False, endpoint=None):
         endpoint = urljoin(endpoint or self.base_endpoint, 'result/final/' + file_id)
         result = self._parse_response(self.requests.get(endpoint, headers=self._get_headers()))
 
         if result['status'] != ResultStatus.FINALISED:
             return None
 
-        return {r['name']: r['value'] for r in result['results']['fields']}
-
+        return result['results'] if verbose else {r['name']: r['value'] for r in result['results']['fields']}
+    
     def get_annotations(self, doc_id=None, task_id=None, user_id=None, specification=None, from_date=None, to_date=None, endpoint=None):
         filters = []
         if doc_id is not None:
