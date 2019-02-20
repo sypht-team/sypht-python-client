@@ -118,7 +118,7 @@ class SyphtClient(object):
 
         return result['fileId']
 
-    def fetch_results(self, file_id, verbose=False, endpoint=None):
+    def fetch_results(self, file_id, endpoint=None, verbose=False):
         endpoint = urljoin(endpoint or self.base_endpoint, 'result/final/' + file_id)
         result = self._parse_response(self.requests.get(endpoint, headers=self._get_headers()))
 
