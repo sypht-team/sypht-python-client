@@ -96,7 +96,7 @@ class SyphtClient(object):
         })
         return headers
 
-    def upload(self, file, fieldset, tags=None, endpoint=None, options=None):
+    def upload(self, file, fieldset, tags=None, endpoint=None, workflow=None, options=None):
         endpoint = urljoin(endpoint or self.base_endpoint, 'fileupload')
         headers = self._get_headers()
         files = {
@@ -108,6 +108,8 @@ class SyphtClient(object):
         }
         if tags:
             data['tags'] = tags
+        if workflow is not None:
+            data['workflowId'] = workflow
         if options is not None:
             data['workflowOptions'] = json.dumps(options)
 
