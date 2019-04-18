@@ -166,11 +166,14 @@ class SyphtClient(object):
         endpoint=None,
         workflow=None,
         options=None,
+        filename=None,
         headers=None,
     ):
         endpoint = urljoin(endpoint or self.base_endpoint, "fileupload")
         headers = headers or {}
         headers = self._get_headers(**headers)
+        if filename is not None:
+            file = (filename, file)
         files = {"fileToUpload": file}
 
         if isinstance(fieldsets, six.string_types):
