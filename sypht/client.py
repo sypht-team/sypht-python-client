@@ -105,7 +105,7 @@ class SyphtClient(object):
             'fileToUpload': file
         }
 
-        if isinstance(fieldsets, str):
+        if isinstance(fieldsets, basestring):
             fieldsets = [fieldsets, ]
         data = { 'fieldSets': json.dumps(fieldsets) }
         

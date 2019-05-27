@@ -1,4 +1,4 @@
-[![Build Status](https://api.travis-ci.org/sypht-team/sypht-python-client.svg?branch=task/travis-ci)](https://travis-ci.org/sypht-team/sypht-python-client) [![codecov](https://codecov.io/gh/sypht-team/sypht-python-client/branch/task/travis-ci/graph/badge.svg)](https://codecov.io/gh/sypht-team/sypht-python-client)
+[![Build Status](https://api.travis-ci.org/sypht-team/sypht-python-client.svg?branch=master)](https://travis-ci.org/sypht-team/sypht-python-client) [![codecov](https://codecov.io/gh/sypht-team/sypht-python-client/branch/master/graph/badge.svg)](https://codecov.io/gh/sypht-team/sypht-python-client)
 
 ## Sypht
 
