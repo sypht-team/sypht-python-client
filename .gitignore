@@ -1,0 +1,8 @@
+.DS_Store
+.vscode
+.envrc
+.coverage
+
+coverage.xml
+
+venv

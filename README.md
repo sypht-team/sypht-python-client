@@ -1,3 +1,5 @@
+[![Build Status](https://api.travis-ci.org/sypht-team/sypht-python-client.svg?branch=task/travis-ci)](https://travis-ci.org/sypht-team/sypht-python-client) [![codecov](https://codecov.io/gh/sypht-team/sypht-python-client/branch/task/travis-ci/graph/badge.svg)](https://codecov.io/gh/sypht-team/sypht-python-client)
+
 ## Sypht
 
 Sypht is an service which extracts key fields from documents. For example, you can upload an image or pdf of a bill or invoice and extract the amount due, due date, invoice number and biller information.

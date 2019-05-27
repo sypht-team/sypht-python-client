@@ -10,20 +10,22 @@ if six.PY2:
 else:
     from urllib.parse import urljoin
 
+
 SYPHT_API_BASE_ENDPOINT = 'https://api.sypht.com'
 SYPHT_AUTH_ENDPOINT = 'https://login.sypht.com/oauth/token'
 SYPHT_OAUTH_COMPANY_ID_CLAIM_KEY = 'https://api.sypht.com/companyId'
+
 
 class ResultStatus:
     FINALISED = 'FINALISED'
 
 
-class Fieldsets:
-    INVOICE_BPAY_PAYMENT = 'invoiceBpayPayment'
-    INVOICE_ELECTRICITY = 'invoiceElectricity'
-    INVOICE_ACCOUNTS_PAYABLE = 'invoiceAccountsPayable'
-    MOBILE_BPAY_PAYMENT = 'mobileBpayPayment'
-    GENERIC = 'generic'
+class Fieldset:
+    GENERIC = 'sypht.generic'
+    DOCUMENT = 'sypht.document'
+    INVOICE = 'sypht.invoice'
+    BILL = 'sypht.bill'
+    BANK = 'sypht.bank'
 
 
 class SyphtClient(object):
@@ -96,16 +98,17 @@ class SyphtClient(object):
         })
         return headers
 
-    def upload(self, file, fieldset, tags=None, endpoint=None, workflow=None, options=None):
+    def upload(self, file, fieldsets, tags=None, endpoint=None, workflow=None, options=None):
         endpoint = urljoin(endpoint or self.base_endpoint, 'fileupload')
         headers = self._get_headers()
         files = {
             'fileToUpload': file
         }
 
-        data = {
-            'fieldSet': fieldset
-        }
+        if isinstance(fieldsets, str):
+            fieldsets = [fieldsets, ]
+        data = { 'fieldSets': json.dumps(fieldsets) }
+        
         if tags:
             data['tags'] = tags
         if workflow is not None:
