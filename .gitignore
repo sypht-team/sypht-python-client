@@ -3,6 +3,9 @@
 .envrc
 .coverage
 
+__pycache__
+sypht.egg-info
+
 coverage.xml
 
 venv
