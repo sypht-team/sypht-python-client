@@ -30,12 +30,18 @@ pip install sypht
 ### Usage
 
 ```python
-from sypht.client import SyphtClient, Fieldsets
+from sypht.client import SyphtClient, Fieldset
 
 sc = SyphtClient('<client_id>', '<client_secret>')
 
 with open('invoice.png', 'rb') as f:
-    fid = sc.upload(f, Fieldsets.INVOICE_BPAY_PAYMENT)
+    fid = sc.upload(f, Fieldset.INVOICE)
 
 print(sc.fetch_results(fid))
+```
+
+or run it in the command line:
+
+```
+$ sypht extract --fieldset sypht.document --fieldset sypht.bank path/to/your/document.pdf
 ```

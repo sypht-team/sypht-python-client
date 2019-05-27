@@ -1,24 +1,26 @@
 #!/usr/bin/env python
+
 import argparse
 import re
 import sys
 import textwrap
 import json
-from sypht.client import SyphtClient, Fieldsets
+
+from sypht.client import SyphtClient, Fieldset
 
 
 class Extract(object):
     """ Extract values from a document. """
-    def __init__(self, path, fieldset):
+    def __init__(self, path, fieldsets):
         self.path = path
-        self.fieldset = fieldset
+        self.fieldsets = fieldsets
 
     def __call__(self):
         sypht = SyphtClient()
 
         print('Uploading: ', self.path, '...')
         with open(self.path, 'rb') as f:
-            doc_id = sypht.upload(f, self.fieldset)
+            doc_id = sypht.upload(f, self.fieldsets)
 
         print('Processing: ', doc_id, '...')
         print(json.dumps(sypht.fetch_results(doc_id), indent=2))
@@ -28,14 +30,16 @@ class Extract(object):
         p.add_argument('path', metavar='PATH')
         p.add_argument('--fieldset',
                        metavar='FIELDSET',
-                       required=False,
-                       default=Fieldsets.INVOICE_ACCOUNTS_PAYABLE,
+                       required=True,
+                       dest='fieldsets',
+                       action='append',
+                       help='one or more fieldsets.',
                        choices=[
-                           Fieldsets.INVOICE_BPAY_PAYMENT,
-                           Fieldsets.INVOICE_ELECTRICITY,
-                           Fieldsets.INVOICE_ACCOUNTS_PAYABLE,
-                           Fieldsets.MOBILE_BPAY_PAYMENT,
-                           Fieldsets.GENERIC
+                           Fieldset.GENERIC,
+                           Fieldset.DOCUMENT,
+                           Fieldset.INVOICE,
+                           Fieldset.BILL,
+                           Fieldset.BANK
                        ])
         p.set_defaults(cls=cls)
         return p
