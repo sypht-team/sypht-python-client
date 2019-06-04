@@ -1,15 +1,14 @@
 import json
 import os
+from base64 import b64decode
 
 import requests
 import six
-from base64 import b64decode
 
 if six.PY2:
     from urlparse import urljoin
 else:
     from urllib.parse import urljoin
-
 
 SYPHT_API_BASE_ENDPOINT = 'https://api.sypht.com'
 SYPHT_AUTH_ENDPOINT = 'https://login.sypht.com/oauth/token'
@@ -55,7 +54,8 @@ class SyphtClient(object):
             raise ValueError('Client credentials missing')
 
         self._company_id = None
-        self._access_token = self._authenticate(client_id, client_secret, audience=self.base_endpoint, endpoint=auth_endpoint)
+        self._access_token = self._authenticate(client_id, client_secret, audience=self.base_endpoint,
+                                                endpoint=auth_endpoint)
 
     @staticmethod
     def _authenticate(client_id, client_secret, audience, endpoint=None):
@@ -107,8 +107,8 @@ class SyphtClient(object):
 
         if isinstance(fieldsets, six.string_types):
             fieldsets = [fieldsets, ]
-        data = { 'fieldSets': json.dumps(fieldsets) }
-        
+        data = {'fieldSets': json.dumps(fieldsets)}
+
         if tags:
             data['tags'] = tags
         if workflow is not None:
@@ -131,8 +131,9 @@ class SyphtClient(object):
             return None
 
         return result['results'] if verbose else {r['name']: r['value'] for r in result['results']['fields']}
-    
-    def get_annotations(self, doc_id=None, task_id=None, user_id=None, specification=None, from_date=None, to_date=None, endpoint=None):
+
+    def get_annotations(self, doc_id=None, task_id=None, user_id=None, specification=None, from_date=None, to_date=None,
+                        endpoint=None):
         filters = []
         if doc_id is not None:
             filters.append('docId=' + doc_id)
@@ -152,6 +153,14 @@ class SyphtClient(object):
         headers['Accept'] = 'application/json'
         headers['Content-Type'] = 'application/json'
         return self._parse_response(self.requests.get(endpoint, headers=headers))
+
+    def get_annotations_for_docs(self, doc_ids, endpoint=None):
+        body = json.dumps({"docIds": doc_ids})
+        endpoint = urljoin(endpoint or self.base_endpoint, ('/validate/annotations/search'))
+        headers = self._get_headers()
+        headers['Accept'] = 'application/json'
+        headers['Content-Type'] = 'application/json'
+        return self._parse_response(self.requests.post(endpoint, data=body, headers=headers))
 
     def set_company_annotations(self, doc_id, annotations, company_id=None, endpoint=None):
         data = {
