@@ -1,7 +1,6 @@
 import json
 import os
 from base64 import b64decode
-from collections import defaultdict
 
 import requests
 import six
@@ -155,17 +154,13 @@ class SyphtClient(object):
         headers['Content-Type'] = 'application/json'
         return self._parse_response(self.requests.get(endpoint, headers=headers))
 
-    def get_many_annotations(self, doc_ids, endpoint=None):
+    def get_annotations_for_docs(self, doc_ids, endpoint=None):
         body = json.dumps({"docIds": doc_ids})
         endpoint = urljoin(endpoint or self.base_endpoint, ('/validate/annotations/search'))
         headers = self._get_headers()
         headers['Accept'] = 'application/json'
         headers['Content-Type'] = 'application/json'
-        annotations = self._parse_response(self.requests.post(endpoint, data=body, headers=headers))
-        annotations_by_doc = defaultdict(list)
-        for a in annotations['annotations']:
-            annotations_by_doc[a['data']['docId']].append(a)
-        return [annotations_by_doc.get(doc_id, None) for doc_id in doc_ids]
+        return self._parse_response(self.requests.post(endpoint, data=body, headers=headers))
 
     def set_company_annotations(self, doc_id, annotations, company_id=None, endpoint=None):
         data = {
