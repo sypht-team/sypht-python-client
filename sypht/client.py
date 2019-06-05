@@ -39,6 +39,7 @@ class SyphtClient(object):
         """
         self.requests = session if session is not None else requests.Session()
         self.base_endpoint = base_endpoint or os.environ.get('SYPHT_API_BASE_ENDPOINT', SYPHT_API_BASE_ENDPOINT)
+        self.audience = os.environ.get('SYPHT_AUDIENCE', self.base_endpoint)
 
         if client_id is None and client_secret is None:
             env_key = os.environ.get(self.API_ENV_KEY)
@@ -54,7 +55,7 @@ class SyphtClient(object):
             raise ValueError('Client credentials missing')
 
         self._company_id = None
-        self._access_token = self._authenticate(client_id, client_secret, audience=self.base_endpoint,
+        self._access_token = self._authenticate(client_id, client_secret, audience=self.audience,
                                                 endpoint=auth_endpoint)
 
     @staticmethod
