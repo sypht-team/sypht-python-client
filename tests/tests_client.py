@@ -41,10 +41,11 @@ class DataExtraction(unittest.TestCase):
 
         results = self.sypht_client.fetch_results(fid)
 
-        self.assertEqual(results['invoice.dueDate'], '2019-06-05')
-        self.assertEqual(results['invoice.total'], '109.88')
-        self.assertEqual(results['invoice.amountPaid'], None)
-        self.assertEqual(results['invoice.amountDue'], '109.88')
+        self.assertTrue(isinstance(results, dict))
+        self.assertIn('invoice.dueDate', results)
+        self.assertIn('invoice.total', results)
+        self.assertIn('invoice.amountPaid', results)
+        self.assertIn('invoice.amountDue', results)
 
     def test_data_extraction_2(self):
         with open('tests/sample_invoice.pdf', 'rb') as f:
@@ -53,12 +54,13 @@ class DataExtraction(unittest.TestCase):
 
         results = self.sypht_client.fetch_results(fid)
 
-        self.assertEqual(results['invoice.dueDate'], '2019-06-05')
-        self.assertEqual(results['invoice.total'], '109.88')
-        self.assertEqual(results['invoice.amountPaid'], None)
-        self.assertEqual(results['invoice.amountDue'], '109.88')
-        self.assertEqual(results['bank.accountNo'], '19550021')
-        self.assertEqual(results['bank.bsb'], '620119')
+        self.assertTrue(isinstance(results, dict))
+        self.assertIn('invoice.dueDate', results)
+        self.assertIn('invoice.total', results)
+        self.assertIn('invoice.amountPaid', results)
+        self.assertIn('invoice.amountDue', results)
+        self.assertIn('bank.accountNo', results)
+        self.assertIn('bank.bsb', results)
 
 
 if __name__ == '__main__':
