@@ -35,7 +35,7 @@ from sypht.client import SyphtClient, Fieldset
 sc = SyphtClient('<client_id>', '<client_secret>')
 
 with open('invoice.png', 'rb') as f:
-    fid = sc.upload(f, Fieldset.INVOICE)
+    fid = sc.upload(f, fieldsets=["document, "invoice"])
 
 print(sc.fetch_results(fid))
 ```
