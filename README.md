@@ -8,20 +8,18 @@ This repository is a Python reference client implementation for working with the
 example, you can upload an image or pdf of a bill or invoice and extract the amount due, due date, invoice number 
 and biller information. 
 
-### Getting started
+## Getting started
 To get started you'll need API credentials, i.e. a `<client_id>` and `<client_secret>`, which can be obtained by registering
 for an [account](https://www.sypht.com/signup/developer)
 
-### Installation
-
+## Installation
 Latest version is available via pypi:
 
 ```
 pip install sypht
 ```
 
-### Usage
-
+## Usage
 ```python
 from sypht.client import SyphtClient, Fieldset
 
@@ -38,3 +36,9 @@ or run it in the command line:
 ```
 $ sypht extract --fieldset sypht.document --fieldset sypht.bank path/to/your/document.pdf
 ```
+
+## License
+The software in this repository is available as open source under the terms of the [Apache License](https://github.com/sypht-team/sypht-python-client/blob/master/LICENSE).
+
+## Code of Conduct
+Everyone interacting in the project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/sypht-team/sypht-python-client/blob/master/CODE_OF_CONDUCT.md).
