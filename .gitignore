@@ -2,7 +2,12 @@
 .vscode
 .envrc
 .coverage
-
+*.pyc
+.idea
+build/
+dist/
+ve2/
+ve3/
 __pycache__
 sypht.egg-info
 
