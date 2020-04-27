@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-__version__ = '0.3.5'
+__version__ = '0.3.6'
 __pkg_name__ = 'sypht'
 
 setup(
