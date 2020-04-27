@@ -196,8 +196,8 @@ class SyphtClient(object):
         headers['Accept'] = 'application/json'
         headers['Content-Type'] = 'application/json'
         task = {
-            "doc_id": doc_id,
-            "company_id": company_id,
+            "docId": doc_id,
+            "companyId": company_id,
             "specification": specification,
             "replication": replication
         }
