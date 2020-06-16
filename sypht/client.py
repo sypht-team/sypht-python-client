@@ -1,6 +1,6 @@
 import json
 import os
-from base64 import b64decode
+from base64 import b64encode
 
 import requests
 import six
@@ -11,26 +11,15 @@ else:
     from urllib.parse import urljoin
 
 SYPHT_API_BASE_ENDPOINT = 'https://api.sypht.com'
-SYPHT_AUTH_ENDPOINT = 'https://login.sypht.com/oauth/token'
+SYPHT_AUTH_ENDPOINT = 'https://auth.sypht.com/oauth2/token'
+SYPHT_LEGACY_AUTH_ENDPOINT = 'https://login.sypht.com/oauth/token'
 SYPHT_OAUTH_COMPANY_ID_CLAIM_KEY = 'https://api.sypht.com/companyId'
-
-
-class ResultStatus:
-    FINALISED = 'FINALISED'
-
-
-class Fieldset:
-    GENERIC = 'sypht.generic'
-    DOCUMENT = 'sypht.document'
-    INVOICE = 'sypht.invoice'
-    BILL = 'sypht.bill'
-    BANK = 'sypht.bank'
 
 
 class SyphtClient(object):
     API_ENV_KEY = 'SYPHT_API_KEY'
 
-    def __init__(self, client_id=None, client_secret=None, base_endpoint=None, auth_endpoint=None, session=None):
+    def __init__(self, client_id=None, client_secret=None, base_endpoint=None, auth_endpoint=None, session=None, auth_version=None):
         """
         :param client_id: Your Sypht-provided OAuth client_id.
         :param client_secret: Your Sypht-provided OAuth client_secret.
@@ -53,14 +42,36 @@ class SyphtClient(object):
 
         if client_id is None or client_secret is None:
             raise ValueError('Client credentials missing')
-
+        self.client_id = client_id
         self._company_id = None
-        self._access_token = self._authenticate(client_id, client_secret, audience=self.audience,
-                                                endpoint=auth_endpoint)
+        if auth_version == 1:
+            self._access_token = self._authenticate_v1(client_id, client_secret, audience=self.audience, endpoint=auth_endpoint)
+        else:
+            self._access_token = self._authenticate(client_id, client_secret, audience=self.audience, endpoint=auth_endpoint)
 
     @staticmethod
     def _authenticate(client_id, client_secret, audience, endpoint=None):
         endpoint = endpoint or os.environ.get('SYPHT_AUTH_ENDPOINT', SYPHT_AUTH_ENDPOINT)
+        basic_auth_slug = b64encode((client_id+':'+client_secret).encode('utf-8')).decode('utf-8')
+        result = requests.post(
+            endpoint,
+            headers={
+                'Accept': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': f"Basic {basic_auth_slug}"
+            },
+            data=f'client_id={client_id}&grant_type=client_credentials',
+            allow_redirects=False
+        ).json()
+
+        if result.get('error'):
+            raise Exception('Authentication failed: {}'.format(result['error']))
+
+        return result['access_token']
+
+    @staticmethod
+    def _authenticate_v1(client_id, client_secret, audience, endpoint=None):
+        endpoint = endpoint or os.environ.get('SYPHT_AUTH_ENDPOINT', SYPHT_LEGACY_AUTH_ENDPOINT)
         result = requests.post(endpoint, data={
             'client_id': client_id,
             'client_secret': client_secret,
@@ -80,16 +91,10 @@ class SyphtClient(object):
         else:
             raise Exception("Request failed with status code ({}): {}".format(response.status_code, response.text))
 
-    @staticmethod
-    def _parse_oauth_claims(token):
-        part = token.split('.')[1]
-        part += "=" * ((4 - len(part) % 4) % 4)
-        return json.loads(b64decode(part))
-
     @property
     def company_id(self):
         if self._company_id is None:
-            self._company_id = self._parse_oauth_claims(self._access_token)[SYPHT_OAUTH_COMPANY_ID_CLAIM_KEY]
+            self._company_id = self.get_company()['id']
 
         return self._company_id
 
@@ -98,6 +103,13 @@ class SyphtClient(object):
             'Authorization': 'Bearer ' + self._access_token
         })
         return headers
+
+    def get_company(self, endpoint=None):
+        endpoint = urljoin(endpoint or self.base_endpoint, f'/useradmin/company/byclientid/{self.client_id}')
+        headers = self._get_headers()
+        headers['Accept'] = 'application/json'
+        headers['Content-Type'] = 'application/json'
+        return self._parse_response(self.requests.get(endpoint, headers=headers))['company']
 
     def upload(self, file, fieldsets, tags=None, endpoint=None, workflow=None, options=None):
         endpoint = urljoin(endpoint or self.base_endpoint, 'fileupload')
@@ -128,7 +140,7 @@ class SyphtClient(object):
         endpoint = urljoin(endpoint or self.base_endpoint, 'result/final/' + file_id)
         result = self._parse_response(self.requests.get(endpoint, headers=self._get_headers()))
 
-        if result['status'] != ResultStatus.FINALISED:
+        if result['status'] != "FINALISED":
             return None
 
         return result['results'] if verbose else {r['name']: r['value'] for r in result['results']['fields']}

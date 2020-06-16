@@ -5,7 +5,7 @@ import six
 
 import warnings
 
-from sypht.client import SyphtClient, Fieldset
+from sypht.client import SyphtClient
 
 from uuid import UUID
 
@@ -36,7 +36,7 @@ class DataExtraction(unittest.TestCase):
 
     def test_data_extraction_1(self):
         with open('tests/sample_invoice.pdf', 'rb') as f:
-            fid = self.sypht_client.upload(f, fieldsets=Fieldset.INVOICE)
+            fid = self.sypht_client.upload(f, fieldsets=["sypht.invoice"])
             self.assertTrue(validate_uuid4(fid))
 
         results = self.sypht_client.fetch_results(fid)
@@ -49,7 +49,7 @@ class DataExtraction(unittest.TestCase):
 
     def test_data_extraction_2(self):
         with open('tests/sample_invoice.pdf', 'rb') as f:
-            fid = self.sypht_client.upload(f, fieldsets=[ Fieldset.INVOICE, Fieldset.BANK, ])
+            fid = self.sypht_client.upload(f, fieldsets=[ "sypht.invoice", "sypht.bank" ])
             self.assertTrue(validate_uuid4(fid))
 
         results = self.sypht_client.fetch_results(fid)
