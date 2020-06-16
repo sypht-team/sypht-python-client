@@ -19,7 +19,7 @@ SYPHT_OAUTH_COMPANY_ID_CLAIM_KEY = 'https://api.sypht.com/companyId'
 class SyphtClient(object):
     API_ENV_KEY = 'SYPHT_API_KEY'
 
-    def __init__(self, client_id=None, client_secret=None, base_endpoint=None, auth_endpoint=None, session=None, auth_version=None):
+    def __init__(self, client_id=None, client_secret=None, base_endpoint=None, auth_endpoint=None, session=None):
         """
         :param client_id: Your Sypht-provided OAuth client_id.
         :param client_secret: Your Sypht-provided OAuth client_secret.
@@ -44,14 +44,17 @@ class SyphtClient(object):
             raise ValueError('Client credentials missing')
         self.client_id = client_id
         self._company_id = None
-        if auth_version == 1:
-            self._access_token = self._authenticate_v1(client_id, client_secret, audience=self.audience, endpoint=auth_endpoint)
+
+        auth_endpoint = auth_endpoint or os.environ.get('SYPHT_AUTH_ENDPOINT', SYPHT_AUTH_ENDPOINT)
+        if '/oauth/' in auth_endpoint:
+            self._access_token = self._authenticate_v1(auth_endpoint, client_id, client_secret, audience=self.audience)
+        elif '/oauth2/' in auth_endpoint:
+            self._access_token = self._authenticate_v2(auth_endpoint, client_id, client_secret, audience=self.audience)
         else:
-            self._access_token = self._authenticate(client_id, client_secret, audience=self.audience, endpoint=auth_endpoint)
+            raise ValueError(f"Invalid authentication endpoint: {auth_endpoint}")
 
     @staticmethod
-    def _authenticate(client_id, client_secret, audience, endpoint=None):
-        endpoint = endpoint or os.environ.get('SYPHT_AUTH_ENDPOINT', SYPHT_AUTH_ENDPOINT)
+    def _authenticate_v2(endpoint, client_id, client_secret, audience):
         basic_auth_slug = b64encode((client_id+':'+client_secret).encode('utf-8')).decode('utf-8')
         result = requests.post(
             endpoint,
@@ -70,7 +73,7 @@ class SyphtClient(object):
         return result['access_token']
 
     @staticmethod
-    def _authenticate_v1(client_id, client_secret, audience, endpoint=None):
+    def _authenticate_v1(endpoint, client_id, client_secret, audience):
         endpoint = endpoint or os.environ.get('SYPHT_AUTH_ENDPOINT', SYPHT_LEGACY_AUTH_ENDPOINT)
         result = requests.post(endpoint, data={
             'client_id': client_id,
