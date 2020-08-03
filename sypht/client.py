@@ -108,11 +108,11 @@ class SyphtClient(object):
         return headers
 
     def get_company(self, endpoint=None):
-        endpoint = urljoin(endpoint or self.base_endpoint, f'/useradmin/company/byclientid/{self.client_id}')
+        endpoint = urljoin(endpoint or self.base_endpoint, f'/app/company/byclientid/{self.client_id}')
         headers = self._get_headers()
         headers['Accept'] = 'application/json'
         headers['Content-Type'] = 'application/json'
-        return self._parse_response(self.requests.get(endpoint, headers=headers))['company']
+        return self._parse_response(self.requests.get(endpoint, headers=headers))
 
     def upload(self, file, fieldsets, tags=None, endpoint=None, workflow=None, options=None):
         endpoint = urljoin(endpoint or self.base_endpoint, 'fileupload')
@@ -164,7 +164,7 @@ class SyphtClient(object):
         if to_date is not None:
             filters.append('toDate=' + to_date)
 
-        endpoint = urljoin(endpoint or self.base_endpoint, ('/validate/annotations?' + '&'.join(filters)))
+        endpoint = urljoin(endpoint or self.base_endpoint, ('/app/annotations?' + '&'.join(filters)))
         headers = self._get_headers()
         headers['Accept'] = 'application/json'
         headers['Content-Type'] = 'application/json'
@@ -172,7 +172,7 @@ class SyphtClient(object):
 
     def get_annotations_for_docs(self, doc_ids, endpoint=None):
         body = json.dumps({"docIds": doc_ids})
-        endpoint = urljoin(endpoint or self.base_endpoint, ('/validate/annotations/search'))
+        endpoint = urljoin(endpoint or self.base_endpoint, ('/app/annotations/search'))
         headers = self._get_headers()
         headers['Accept'] = 'application/json'
         headers['Content-Type'] = 'application/json'
@@ -190,7 +190,7 @@ class SyphtClient(object):
             } for field, value in annotations.items()]
         }
         company_id = company_id or self.company_id
-        path = "/validate/docs/{}/companyannotation/{}/data".format(doc_id, company_id)
+        path = "/app/docs/{}/companyannotation/{}/data".format(doc_id, company_id)
         endpoint = urljoin(endpoint or self.base_endpoint, path)
         headers = self._get_headers()
         headers['Accept'] = 'application/json'
@@ -198,7 +198,7 @@ class SyphtClient(object):
         return self._parse_response(self.requests.put(endpoint, data=json.dumps(data), headers=headers))
 
     def update_specification(self, specification, endpoint=None):
-        endpoint = urljoin(endpoint or self.base_endpoint, 'validate/specifications')
+        endpoint = urljoin(endpoint or self.base_endpoint, 'app/specifications')
         headers = self._get_headers()
         headers['Accept'] = 'application/json'
         headers['Content-Type'] = 'application/json'
@@ -206,7 +206,7 @@ class SyphtClient(object):
 
     def submit_task(self, doc_id, specification, company_id=None, replication=1, priority=None, endpoint=None):
         company_id = company_id or self.company_id
-        endpoint = urljoin(endpoint or self.base_endpoint, 'validate/tasks')
+        endpoint = urljoin(endpoint or self.base_endpoint, 'app/tasks')
         headers = self._get_headers()
         headers['Accept'] = 'application/json'
         headers['Content-Type'] = 'application/json'
