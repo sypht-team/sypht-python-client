@@ -99,7 +99,7 @@ class SyphtClient(object):
 
         return self._company_id
     
-    def _is_auth_expiry_valid(self):
+    def _is_token_expired(self):
         return datetime.now() > self.auth_expiry
         
     def _authenticate_client(self):
@@ -113,7 +113,7 @@ class SyphtClient(object):
         return access_token, auth_expiry
             
     def _get_headers(self, **headers):
-        if not self._is_auth_expiry_valid():
+        if self._is_token_expired():
             self._access_token, expires_in = self._authenticate_client()
             self.auth_expiry = datetime.utcnow() + timedelta(seconds=expires_in)
             
