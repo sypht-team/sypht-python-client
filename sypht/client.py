@@ -100,7 +100,7 @@ class SyphtClient(object):
         return self._company_id
     
     def _is_token_expired(self):
-        return datetime.now() > self._auth_expiry
+        return datetime.utcnow() > self._auth_expiry
         
     def _authenticate_client(self):
         if '/oauth/' in self.auth_endpoint:
