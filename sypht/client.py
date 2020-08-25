@@ -49,7 +49,7 @@ class SyphtClient(object):
         self._client_secret = client_secret
         self._company_id = None
         self._access_token, expires_in = self._authenticate_client()
-        self.auth_expiry = datetime.utcnow() + timedelta(seconds=expires_in)
+        self._auth_expiry = datetime.utcnow() + timedelta(seconds=expires_in)
                     
     @staticmethod
     def _authenticate_v2(endpoint, client_id, client_secret, audience):
@@ -100,7 +100,7 @@ class SyphtClient(object):
         return self._company_id
     
     def _is_token_expired(self):
-        return datetime.now() > self.auth_expiry
+        return datetime.now() > self._auth_expiry
         
     def _authenticate_client(self):
         if '/oauth/' in self.auth_endpoint:
@@ -115,7 +115,7 @@ class SyphtClient(object):
     def _get_headers(self, **headers):
         if self._is_token_expired():
             self._access_token, expires_in = self._authenticate_client()
-            self.auth_expiry = datetime.utcnow() + timedelta(seconds=expires_in)
+            self._auth_expiry = datetime.utcnow() + timedelta(seconds=expires_in)
             
         headers.update({
             'Authorization': 'Bearer ' + self._access_token
