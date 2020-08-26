@@ -1,6 +1,7 @@
 import json
 import os
 from base64 import b64encode
+from datetime import datetime, timedelta
 
 import requests
 import six
@@ -29,6 +30,7 @@ class SyphtClient(object):
         self.requests = session if session is not None else requests.Session()
         self.base_endpoint = base_endpoint or os.environ.get('SYPHT_API_BASE_ENDPOINT', SYPHT_API_BASE_ENDPOINT)
         self.audience = os.environ.get('SYPHT_AUDIENCE', self.base_endpoint)
+        self.auth_endpoint = auth_endpoint or os.environ.get('SYPHT_AUTH_ENDPOINT', SYPHT_AUTH_ENDPOINT)
 
         if client_id is None and client_secret is None:
             env_key = os.environ.get(self.API_ENV_KEY)
@@ -42,17 +44,12 @@ class SyphtClient(object):
 
         if client_id is None or client_secret is None:
             raise ValueError('Client credentials missing')
+            
         self.client_id = client_id
+        self._client_secret = client_secret
         self._company_id = None
-
-        auth_endpoint = auth_endpoint or os.environ.get('SYPHT_AUTH_ENDPOINT', SYPHT_AUTH_ENDPOINT)
-        if '/oauth/' in auth_endpoint:
-            self._access_token = self._authenticate_v1(auth_endpoint, client_id, client_secret, audience=self.audience)
-        elif '/oauth2/' in auth_endpoint:
-            self._access_token = self._authenticate_v2(auth_endpoint, client_id, client_secret, audience=self.audience)
-        else:
-            raise ValueError(f"Invalid authentication endpoint: {auth_endpoint}")
-
+        self._authenticate_client()
+                    
     @staticmethod
     def _authenticate_v2(endpoint, client_id, client_secret, audience):
         basic_auth_slug = b64encode((client_id+':'+client_secret).encode('utf-8')).decode('utf-8')
@@ -70,7 +67,7 @@ class SyphtClient(object):
         if result.get('error'):
             raise Exception('Authentication failed: {}'.format(result['error']))
 
-        return result['access_token']
+        return result['access_token'], result['expires_in']
 
     @staticmethod
     def _authenticate_v1(endpoint, client_id, client_secret, audience):
@@ -85,7 +82,7 @@ class SyphtClient(object):
         if result.get('error_description'):
             raise Exception('Authentication failed: {}'.format(result['error_description']))
 
-        return result['access_token']
+        return result['access_token'], result['expires_in']
 
     @staticmethod
     def _parse_response(response):
@@ -100,8 +97,25 @@ class SyphtClient(object):
             self._company_id = self.get_company()['id']
 
         return self._company_id
-
+    
+    def _is_token_expired(self):
+        return datetime.utcnow() > self._auth_expiry
+        
+    def _authenticate_client(self):
+        if '/oauth/' in self.auth_endpoint:
+            access_token, expires_in = self._authenticate_v1(self.auth_endpoint, self.client_id, self._client_secret, audience=self.audience)
+        elif '/oauth2/' in self.auth_endpoint:
+            access_token, expires_in = self._authenticate_v2(self.auth_endpoint, self.client_id, self._client_secret, audience=self.audience)
+        else:
+            raise ValueError(f"Invalid authentication endpoint: {auth_endpoint}")
+        
+        self._auth_expiry = datetime.utcnow() + timedelta(seconds=expires_in)
+        self._access_token = access_token
+            
     def _get_headers(self, **headers):
+        if self._is_token_expired():
+            self._authenticate_client()
+            
         headers.update({
             'Authorization': 'Bearer ' + self._access_token
         })

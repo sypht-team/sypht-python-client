@@ -6,9 +6,10 @@ import six
 import warnings
 
 from sypht.client import SyphtClient
+from time import sleep
 
 from uuid import UUID
-
+from datetime import datetime, timedelta
 
 def validate_uuid4(uuid_string):
     try:
@@ -63,5 +64,25 @@ class DataExtraction(unittest.TestCase):
         self.assertIn('bank.bsb', results)
 
 
+class ReauthenticateTest(unittest.TestCase):
+    def setUp(self):
+        self.sypht_client = SyphtClient()
+        self.init_access_token = str(self.sypht_client._access_token)
+        self.assertFalse(self.sypht_client._is_token_expired())
+    
+    def test_no_reauthentication(self):
+        # Test non-expired token doesn't require reauthentication
+        self.sypht_client.get_company()
+        self.assertEqual(self.init_access_token, self.sypht_client._access_token)
+    
+    def test_reauthentication(self):
+        # Set auth expiry to 1 second ago to avoid mocking datetime
+        self.sypht_client._auth_expiry = datetime.utcnow() - timedelta(seconds=1)
+        self.assertTrue(self.sypht_client._is_token_expired())
+        
+        # Get request will auto-reauthenticate.
+        self.sypht_client.get_company()
+        self.assertFalse(self.sypht_client._is_token_expired())
+                
 if __name__ == '__main__':
     unittest.main()
