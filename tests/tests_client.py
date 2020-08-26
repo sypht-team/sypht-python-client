@@ -6,6 +6,7 @@ import six
 import warnings
 
 from sypht.client import SyphtClient
+from time import sleep
 
 from uuid import UUID
 from datetime import datetime, timedelta
@@ -66,7 +67,7 @@ class DataExtraction(unittest.TestCase):
 class ReauthenticateTest(unittest.TestCase):
     def setUp(self):
         self.sypht_client = SyphtClient()
-        self.init_access_token = self.sypht_client._access_token
+        self.init_access_token = str(self.sypht_client._access_token)
         self.assertFalse(self.sypht_client._is_token_expired())
     
     def test_no_reauthentication(self):
@@ -76,13 +77,15 @@ class ReauthenticateTest(unittest.TestCase):
     
     def test_reauthentication(self):
         # Set auth expiry to 1 second ago to avoid mocking datetime
-        self.sypht_client._auth_expiry = datetime.utcnow() - timedelta(seconds=1)        
+        self.sypht_client._auth_expiry = datetime.utcnow() - timedelta(seconds=1)
         self.assertTrue(self.sypht_client._is_token_expired())
         
-        # Get request will auto-reauthenticate
+        # Get request will auto-reauthenticate. We will sleep to prevent instant api calls
+        sleep(1)
         self.sypht_client.get_company()
-        self.assertNotEqual(self.init_access_token, self.sypht_client._access_token)
         self.assertFalse(self.sypht_client._is_token_expired())
+        self.sypht_client._authenticate_client()
+        self.assertNotEqual(self.init_access_token, self.sypht_client._access_token)
         
         
 if __name__ == '__main__':
