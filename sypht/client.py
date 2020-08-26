@@ -66,7 +66,7 @@ class SyphtClient(object):
 
         if result.get('error'):
             raise Exception('Authentication failed: {}'.format(result['error']))
-        
+
         return result['access_token'], result['expires_in']
 
     @staticmethod
@@ -81,9 +81,9 @@ class SyphtClient(object):
 
         if result.get('error_description'):
             raise Exception('Authentication failed: {}'.format(result['error_description']))
-        
+
         return result['access_token'], result['expires_in']
-    
+
     @staticmethod
     def _parse_response(response):
         if 200 <= response.status_code < 300:
