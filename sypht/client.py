@@ -158,9 +158,19 @@ class SyphtClient(object):
         headers["Content-Type"] = "application/json"
         return self._parse_response(self.requests.get(endpoint, headers=headers))
 
-    def upload(self, file, fieldsets, tags=None, endpoint=None, workflow=None, options=None):
+    def upload(
+        self,
+        file,
+        fieldsets,
+        tags=None,
+        endpoint=None,
+        workflow=None,
+        options=None,
+        headers=None,
+    ):
         endpoint = urljoin(endpoint or self.base_endpoint, "fileupload")
-        headers = self._get_headers()
+        headers = headers or {}
+        headers = self._get_headers(**headers)
         files = {"fileToUpload": file}
 
         if isinstance(fieldsets, six.string_types):
@@ -187,9 +197,11 @@ class SyphtClient(object):
 
         return result["fileId"]
 
-    def fetch_results(self, file_id, endpoint=None, verbose=False):
+    def fetch_results(self, file_id, endpoint=None, verbose=False, headers=None):
         endpoint = urljoin(endpoint or self.base_endpoint, "result/final/" + file_id)
-        result = self._parse_response(self.requests.get(endpoint, headers=self._get_headers()))
+        headers = headers or {}
+        headers = self._get_headers(**headers)
+        result = self._parse_response(self.requests.get(endpoint, headers=headers))
 
         if result["status"] != "FINALISED":
             return None
