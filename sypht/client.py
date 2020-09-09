@@ -200,7 +200,7 @@ class SyphtClient(object):
     def fetch_results(self, file_id, endpoint=None, verbose=False, headers=None):
         endpoint = urljoin(endpoint or self.base_endpoint, "result/final/" + file_id)
         if verbose:
-            endpoint += "&verbose=true"
+            endpoint += "?verbose=true"
         headers = headers or {}
         headers = self._get_headers(**headers)
         result = self._parse_response(self.requests.get(endpoint, headers=headers))
