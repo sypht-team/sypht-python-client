@@ -38,7 +38,7 @@ $ sypht extract --fieldset sypht.document --fieldset sypht.bank path/to/your/doc
 ```
 
 ## License
-The software in this repository is available as open source under the terms of the [Apache License](https://github.com/sypht-team/sypht-python-client/blob/master/LICENSE).
+The software in this repository is available as open source under the terms of the [MIT License](https://github.com/sypht-team/sypht-python-client/blob/master/LICENSE).
 
 ## Code of Conduct
 Everyone interacting in the project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/sypht-team/sypht-python-client/blob/master/CODE_OF_CONDUCT.md).
