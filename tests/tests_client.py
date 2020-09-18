@@ -1,13 +1,8 @@
 import os
 import unittest
-import json
-import six
-
 import warnings
 
 from sypht.client import SyphtClient
-from time import sleep
-
 from uuid import UUID
 from datetime import datetime, timedelta
 
@@ -23,8 +18,7 @@ def validate_uuid4(uuid_string):
 
 class DataExtraction(unittest.TestCase):
     def setUp(self):
-        if not six.PY2:
-            warnings.simplefilter("ignore", category=ResourceWarning)
+        warnings.simplefilter("ignore", category=ResourceWarning)
 
         self.sypht_client = SyphtClient(os.environ["CLIENT_ID"], os.environ["CLIENT_SECRET"])
 
@@ -33,7 +27,7 @@ class DataExtraction(unittest.TestCase):
             with open("tests/sample_invoice.pdf", "rb") as f:
                 response = self.sypht_client.upload(f, ["sypht.incorrect",])
                 self.assertIn(
-                    "does not have permission to use fieldSet sypht.incorrect", reponse["error"]
+                    "does not have permission to use fieldSet sypht.incorrect", response["error"]
                 )
 
         self.assertTrue("Request failed with status code" in str(context.exception))

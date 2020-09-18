@@ -4,12 +4,7 @@ from base64 import b64encode
 from datetime import datetime, timedelta
 
 import requests
-import six
-
-if six.PY2:
-    from urlparse import urljoin
-else:
-    from urllib.parse import urljoin
+from urllib.parse import urljoin
 
 SYPHT_API_BASE_ENDPOINT = "https://api.sypht.com"
 SYPHT_AUTH_ENDPOINT = "https://auth.sypht.com/oauth2/token"
@@ -173,7 +168,7 @@ class SyphtClient(object):
         headers = self._get_headers(**headers)
         files = {"fileToUpload": file}
 
-        if isinstance(products, six.string_types):
+        if isinstance(products, str):
             products = [
                 products,
             ]

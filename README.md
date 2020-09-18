@@ -2,12 +2,15 @@
 
 # Sypht Python Client
 
-This repository is a Python reference client implementation for working with the Sypht API at https://api.sypht.com.
+This repository is a Python 3+ reference client implementation for the Sypht API at https://api.sypht.com.
 
 ## About Sypht
 
-[Sypht](https://sypht.com) is a SaaS [API]((https://docs.sypht.com/)) which extracts key fields from documents.
+[Sypht](https://sypht.com) is a SaaS [API](<(https://docs.sypht.com/)>) which extracts key fields from documents and images.
+
 For example, you can upload an image or pdf of a bill or invoice and extract the amount due, due date, invoice number and biller information.
+
+For an up-to-date list of supported extraction types, see the [Marketplace](https://app.sypht.com/marketplace).
 
 ## Getting started
 
@@ -34,13 +37,17 @@ with open('invoice.png', 'rb') as f:
 print(sc.fetch_results(fid))
 ```
 
-or run it in the command line:
+or run it via the command line:
 
 ```
 $ sypht extract --product invoices path/to/your/document.pdf
 ```
 
+## Documentation
+
 Visit the [Marketplace](https://app.sypht.com/marketplace/products) to see the full set of available AI Products, document types and data fields supported.
+
+Advanced workflows, features and field data structures are covered in the [Dev Guide](https://sypht.gitbook.io/sypht/).
 
 ## License
 

@@ -16,5 +16,5 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
-    install_requires=["requests>=2.20.1,<3", "six>=1.11.0,<2"],
+    install_requires=["requests>=2.20.1,<3"],
 )
