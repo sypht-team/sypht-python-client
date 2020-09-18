@@ -161,7 +161,7 @@ class SyphtClient(object):
     def upload(
         self,
         file,
-        fieldsets,
+        products,
         tags=None,
         endpoint=None,
         workflow=None,
@@ -173,11 +173,11 @@ class SyphtClient(object):
         headers = self._get_headers(**headers)
         files = {"fileToUpload": file}
 
-        if isinstance(fieldsets, six.string_types):
-            fieldsets = [
-                fieldsets,
+        if isinstance(products, six.string_types):
+            products = [
+                products,
             ]
-        data = {"fieldSets": json.dumps(fieldsets)}
+        data = {"products": json.dumps(products)}
 
         if tags:
             data["tags"] = tags

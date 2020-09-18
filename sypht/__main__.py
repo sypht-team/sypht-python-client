@@ -11,16 +11,16 @@ from sypht.client import SyphtClient
 class Extract(object):
     """ Extract values from a document. """
 
-    def __init__(self, path, fieldsets):
+    def __init__(self, path, products):
         self.path = path
-        self.fieldsets = fieldsets
+        self.products = products
 
     def __call__(self):
         sypht = SyphtClient()
 
         print("Uploading: ", self.path, "...")
         with open(self.path, "rb") as f:
-            doc_id = sypht.upload(f, self.fieldsets)
+            doc_id = sypht.upload(f, self.products)
 
         print("Processing: ", doc_id, "...")
         print(json.dumps(sypht.fetch_results(doc_id), indent=2))
@@ -29,12 +29,12 @@ class Extract(object):
     def add_arguments(cls, p):
         p.add_argument("path", metavar="PATH")
         p.add_argument(
-            "--fieldset",
+            "--product",
             metavar="FIELDSET",
             required=True,
-            dest="fieldsets",
+            dest="products",
             action="append",
-            help="one or more fieldsets.",
+            help="one or more products.",
         )
         p.set_defaults(cls=cls)
         return p

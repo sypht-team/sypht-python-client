@@ -31,7 +31,7 @@ class DataExtraction(unittest.TestCase):
     def test_with_wrong_fieldset(self):
         with self.assertRaises(Exception) as context:
             with open("tests/sample_invoice.pdf", "rb") as f:
-                response = self.sypht_client.upload(f, fieldsets=["sypht.incorrect",])
+                response = self.sypht_client.upload(f, ["sypht.incorrect",])
                 self.assertIn(
                     "does not have permission to use fieldSet sypht.incorrect", reponse["error"]
                 )
@@ -40,7 +40,7 @@ class DataExtraction(unittest.TestCase):
 
     def test_data_extraction_1(self):
         with open("tests/sample_invoice.pdf", "rb") as f:
-            fid = self.sypht_client.upload(f, fieldsets=["sypht.invoice"])
+            fid = self.sypht_client.upload(f, ["invoices"])
             self.assertTrue(validate_uuid4(fid))
 
         results = self.sypht_client.fetch_results(fid)
@@ -53,7 +53,7 @@ class DataExtraction(unittest.TestCase):
 
     def test_data_extraction_2(self):
         with open("tests/sample_invoice.pdf", "rb") as f:
-            fid = self.sypht_client.upload(f, fieldsets=["sypht.invoice", "sypht.bank"])
+            fid = self.sypht_client.upload(f, products=["sypht.invoice", "sypht.bank"])
             self.assertTrue(validate_uuid4(fid))
 
         results = self.sypht_client.fetch_results(fid)
