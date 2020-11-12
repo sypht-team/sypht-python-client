@@ -162,6 +162,7 @@ class SyphtClient(object):
         workflow=None,
         options=None,
         headers=None,
+        parent_doc_id=None,
     ):
         endpoint = urljoin(endpoint or self.base_endpoint, "fileupload")
         headers = headers or {}
@@ -180,6 +181,8 @@ class SyphtClient(object):
             data["workflowId"] = workflow
         if options is not None:
             data["workflowOptions"] = json.dumps(options)
+        if parent_doc_id is not None:
+            data["parentDocId"] = parent_doc_id
 
         result = self._parse_response(
             self.requests.post(endpoint, data=data, files=files, headers=headers)
