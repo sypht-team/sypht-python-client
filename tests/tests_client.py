@@ -3,7 +3,7 @@ import unittest
 import warnings
 
 from sypht.client import SyphtClient
-from uuid import UUID
+from uuid import UUID, uuid4
 from datetime import datetime, timedelta
 
 
@@ -59,6 +59,12 @@ class DataExtraction(unittest.TestCase):
         self.assertIn("invoice.amountDue", results)
         self.assertIn("bank.accountNo", results)
         self.assertIn("bank.bsb", results)
+
+    def test_parent_doc_id(self):
+        parent_doc_id=uuid4()
+        with open("tests/sample_invoice.pdf", "rb") as f:
+            fid = self.sypht_client.upload(f, ["invoices"], parent_doc_id=parent_doc_id)
+            self.assertTrue(validate_uuid4(fid))
 
 
 class ReauthenticateTest(unittest.TestCase):
