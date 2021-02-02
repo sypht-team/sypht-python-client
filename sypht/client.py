@@ -12,6 +12,11 @@ SYPHT_LEGACY_AUTH_ENDPOINT = "https://login.sypht.com/oauth/token"
 SYPHT_OAUTH_COMPANY_ID_CLAIM_KEY = "https://api.sypht.com/companyId"
 
 
+def _iter_chunked_sequence(seq, size):
+    for pos in range(0, len(seq), size):
+        yield seq[pos : pos + size]
+
+
 class SyphtClient(object):
     API_ENV_KEY = "SYPHT_API_KEY"
 
@@ -145,8 +150,11 @@ class SyphtClient(object):
         return headers
 
     def get_company(self, endpoint=None):
+        return self.get_company_by_client_id(self.client_id, endpoint=endpoint)
+
+    def get_company_by_client_id(self, client_id, endpoint=None):
         endpoint = urljoin(
-            endpoint or self.base_endpoint, f"/app/company/byclientid/{self.client_id}"
+            endpoint or self.base_endpoint, f"/app/company/byclientid/{client_id}"
         )
         headers = self._get_headers()
         headers["Accept"] = "application/json"
@@ -270,6 +278,96 @@ class SyphtClient(object):
             self.requests.put(endpoint, data=json.dumps(data), headers=headers)
         )
 
+    def get_entity(self, entity_id, entity_type, company_id=None, endpoint=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"storage/{company_id}/entity/{entity_type}/{entity_id}",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(self.requests.get(endpoint, headers=headers))
+
+    def set_entity(self, entity_id, entity_type, data, company_id=None, endpoint=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"storage/{company_id}/entity/{entity_type}/{entity_id}",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(
+            self.requests.put(endpoint, data=json.dumps(data), headers=headers)
+        )
+
+    def delete_entity(self, entity_id, entity_type, company_id=None, endpoint=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"storage/{company_id}/entity/{entity_type}/{entity_id}",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(self.requests.delete(endpoint, headers=headers))
+
+    def set_many_entities(
+        self, entity_type, entities, batch_size=1000, company_id=None, endpoint=None
+    ):
+        """
+        Updates a set of entities in bulk.
+
+        Entities should be list with structure:
+        [
+            {"entity_id": "id_0", "data": {"some_field": "abc123", "Another Field": "2020-11-04"}},
+            {"entity_id": "id_1", "data": {"some_field": "abc124", "Another Field": "2020-11-05"}},
+            {"entity_id": "id_2", "data": {"some_field": "ghi789", "Another Field": "2020-11-06"}}
+            ...
+        ]
+        """
+        if entities is None or not isinstance(entities, list):
+            raise ValueError("Expected a list of entities")
+
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"storage/{company_id}/bulkentity/{entity_type}/",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+
+        responses = []
+        for batch in _iter_chunked_sequence(entities, batch_size):
+            responses.append(
+                self._parse_response(
+                    self.requests.post(endpoint, data=json.dumps(batch), headers=headers)
+                )
+            )
+        return responses
+
+    def search_entities(
+        self, entity_type, exact=None, fuzzy=None, company_id=None, endpoint=None
+    ):
+        exact = exact or {}
+        fuzzy = fuzzy or {}
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint, f"storage/{company_id}/entitysearch/{entity_type}/"
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(
+            self.requests.post(
+                endpoint,
+                data=json.dumps({"exact": exact, "fuzzy": fuzzy}),
+                headers=headers,
+            )
+        )
+
     def update_specification(self, specification, endpoint=None):
         endpoint = urljoin(endpoint or self.base_endpoint, "app/specifications")
         headers = self._get_headers()
@@ -305,4 +403,3 @@ class SyphtClient(object):
         return self._parse_response(
             self.requests.post(endpoint, data=json.dumps(task), headers=headers)
         )
-
