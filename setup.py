@@ -1,6 +1,6 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
-__version__ = "0.5.2"
+__version__ = "0.5.3"
 __pkg_name__ = "sypht"
 
 setup(

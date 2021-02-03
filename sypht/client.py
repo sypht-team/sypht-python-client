@@ -2,9 +2,9 @@ import json
 import os
 from base64 import b64encode
 from datetime import datetime, timedelta
+from urllib.parse import urljoin
 
 import requests
-from urllib.parse import urljoin
 
 SYPHT_API_BASE_ENDPOINT = "https://api.sypht.com"
 SYPHT_AUTH_ENDPOINT = "https://auth.sypht.com/oauth2/token"
@@ -276,6 +276,127 @@ class SyphtClient(object):
         headers["Content-Type"] = "application/json"
         return self._parse_response(
             self.requests.put(endpoint, data=json.dumps(data), headers=headers)
+        )
+
+    def get_tag(self, tag, company_id=None, endpoint=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"app/company/{company_id}/tags/{tag}",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(self.requests.get(endpoint, headers=headers))
+
+    def create_tag(self, tag, description=None, company_id=None, endpoint=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"app/company/{company_id}/tags",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(self.requests.post(endpoint, data=json.dumps({
+            "name": tag,
+            "description": description
+        }), headers=headers))
+
+    def delete_tag(self, tag, company_id=None, endpoint=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"app/company/{company_id}/tags/{tag}",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(self.requests.delete(endpoint, headers=headers))
+
+    def get_files_for_tag(self, tag, company_id=None, endpoint=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"app/company/{company_id}/tags/{tag}/documents",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(self.requests.get(endpoint, headers=headers))
+
+    def set_files_for_tag(self, tag, file_ids, company_id=None, endpoint=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"app/company/{company_id}/tags/{tag}/documents",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(
+            self.requests.put(endpoint, data=json.dumps({"docs": file_ids}), headers=headers)
+        )
+
+    def add_files_to_tag(self, tag, file_ids, company_id=None, endpoint=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"app/company/{company_id}/tags/{tag}/documents",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(
+            self.requests.patch(endpoint, data=json.dumps({"docs": file_ids}), headers=headers)
+        )
+
+    def remove_file_from_tag(self, file_id, tag, company_id=None, endpoint=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"app/company/{company_id}/tags/{tag}/documents/{file_id}",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(self.requests.delete(endpoint, headers=headers))
+
+    def get_tags_for_file(self, file_id, company_id=None, endpoint=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"app/company/{company_id}/documents/{file_id}/tags",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(self.requests.get(endpoint, headers=headers))
+
+    def set_tags_for_file(self, file_id, tags, company_id=None, endpoint=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"app/company/{company_id}/documents/{file_id}/tags",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(
+            self.requests.put(endpoint, data=json.dumps({"tags": tags}), headers=headers)
+        )
+
+    def add_tags_to_file(self, file_id, tags, company_id=None, endpoint=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"app/company/{company_id}/documents/{file_id}/tags",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(
+            self.requests.patch(endpoint, data=json.dumps({"tags": tags}), headers=headers)
         )
 
     def get_entity(self, entity_id, entity_type, company_id=None, endpoint=None):
