@@ -203,6 +203,54 @@ class SyphtClient(object):
 
         return result["fileId"]
 
+    def run_workflow(self, workflow, inputs, step=None, endpoint=None, headers=None):
+        endpoint = urljoin(endpoint or self.base_endpoint, f"workflows/{workflow}/invoke")
+        headers = headers or {}
+        headers = self._get_headers(**headers)
+        return self._parse_response(
+            self.requests.post(
+                endpoint,
+                data=json.dumps(
+                    {
+                        "step_id": step,
+                        "inputs": inputs,
+                    }
+                ),
+                headers=headers,
+            )
+        )
+
+    def create_file(self, file, filename=None, endpoint=None, headers=None):
+        endpoint = urljoin(endpoint or self.base_endpoint, "fileupload/v2/multipart")
+        headers = headers or {}
+        headers = self._get_headers(**headers)
+        if filename is not None:
+            file = filename, file
+        return self._parse_response(
+            self.requests.post(endpoint, files={"file": file}, headers=headers)
+        )
+
+    def get_file(self, file_id, endpoint=None, headers=None):
+        endpoint = urljoin(endpoint or self.base_endpoint, f"app/docs/{file_id}")
+        headers = headers or {}
+        headers = self._get_headers(**headers)
+        return self._parse_response(self.requests.get(endpoint, headers=headers))
+
+    def get_file_data(self, file_id, endpoint=None, headers=None):
+        endpoint = urljoin(endpoint or self.base_endpoint, f"app/docs/{file_id}/download")
+        headers = headers or {}
+        headers = self._get_headers(**headers)
+        response = self.requests.get(endpoint, headers=headers)
+
+        if response.status_code != 200:
+            raise Exception(
+                "Request failed with status code ({}): {}".format(
+                    response.status_code, response.text
+                )
+            )
+
+        return response.content
+
     def fetch_results(self, file_id, endpoint=None, verbose=False, headers=None):
         endpoint = urljoin(endpoint or self.base_endpoint, "result/final/" + file_id)
         if verbose:
@@ -298,10 +346,13 @@ class SyphtClient(object):
         headers = self._get_headers()
         headers["Accept"] = "application/json"
         headers["Content-Type"] = "application/json"
-        return self._parse_response(self.requests.post(endpoint, data=json.dumps({
-            "name": tag,
-            "description": description
-        }), headers=headers))
+        return self._parse_response(
+            self.requests.post(
+                endpoint,
+                data=json.dumps({"name": tag, "description": description}),
+                headers=headers,
+            )
+        )
 
     def delete_tag(self, tag, company_id=None, endpoint=None):
         company_id = company_id or self.company_id
