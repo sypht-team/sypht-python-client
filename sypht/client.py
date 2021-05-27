@@ -461,6 +461,22 @@ class SyphtClient(object):
         headers["Content-Type"] = "application/json"
         return self._parse_response(self.requests.get(endpoint, headers=headers))
 
+    def list_entities(self, entity_type, company_id=None, page=None, limit=None, endpoint=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"storage/{company_id}/entitysearch/{entity_type}",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        params = {}
+        if page:
+            params["page"] = page
+        if limit:
+            params["limit"] = int(limit)
+        return self._parse_response(self.requests.get(endpoint, headers=headers, params=params))
+
     def set_entity(self, entity_id, entity_type, data, company_id=None, endpoint=None):
         company_id = company_id or self.company_id
         endpoint = urljoin(
