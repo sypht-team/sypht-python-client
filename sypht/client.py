@@ -461,6 +461,33 @@ class SyphtClient(object):
         headers["Content-Type"] = "application/json"
         return self._parse_response(self.requests.get(endpoint, headers=headers))
 
+    def get_many_entities(self, entity_type, entities, company_id=None, endpoint=None):
+        """
+        Get entities in bulk.
+
+        Entities should be list with structure:
+        [
+            {"entity_id": "id_0"},
+            {"entity_id": "id_1"},
+            {"entity_id": "id_2"},
+            ...
+        ]
+        """
+        if entities is None or not isinstance(entities, list):
+            raise ValueError("Expected a list of entities")
+
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"storage/{company_id}/entitysearch/{entity_type}/by_id",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(
+            self.requests.post(endpoint, data=json.dumps(entities), headers=headers)
+        )
+
     def list_entities(self, entity_type, company_id=None, page=None, limit=None, endpoint=None):
         company_id = company_id or self.company_id
         endpoint = urljoin(
