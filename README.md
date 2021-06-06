@@ -40,7 +40,8 @@ print(sc.fetch_results(fid))
 or run it via the command line:
 
 ```
-$ sypht extract --product invoices path/to/your/document.pdf
+export SYPHT_API_KEY="<client_id>:<client_secret>"
+sypht extract --product invoices path/to/your/document.pdf
 ```
 
 ## Documentation
