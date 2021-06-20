@@ -53,10 +53,10 @@ class SyphtClient(object):
                 )
             elif env_key and len(key_parts) != 2:
                 raise ValueError(
-                    f"Invalid {self.API_ENV_KEY} environment variable configured. " +
-                    "<client_id> and <client_secret> must be provided as a single, " +
-                    "colon-separated environment variable, i.e: " +
-                    f'export {self.API_ENV_KEY}="<client_id>:<client_secret>"'
+                    f"Invalid {self.API_ENV_KEY} environment variable configured. "
+                    + "<client_id> and <client_secret> must be provided as a single, "
+                    + "colon-separated environment variable, i.e: "
+                    + f'export {self.API_ENV_KEY}="<client_id>:<client_secret>"'
                 )
             client_id, client_secret = key_parts
 
