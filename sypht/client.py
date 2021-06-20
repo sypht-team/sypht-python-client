@@ -454,6 +454,7 @@ class SyphtClient(object):
     def get_entity(self, entity_id, entity_type, company_id=None, endpoint=None):
         company_id = company_id or self.company_id
         entity_id = quote_plus(entity_id)
+        entity_type = quote_plus(entity_type)
         endpoint = urljoin(
             endpoint or self.base_endpoint,
             f"storage/{company_id}/entity/{entity_type}/{entity_id}",
@@ -479,6 +480,7 @@ class SyphtClient(object):
             raise ValueError("Expected a list of entities")
 
         company_id = company_id or self.company_id
+        entity_type = quote_plus(entity_type)
         endpoint = urljoin(
             endpoint or self.base_endpoint,
             f"storage/{company_id}/entitysearch/{entity_type}/by_id",
@@ -492,6 +494,7 @@ class SyphtClient(object):
 
     def list_entities(self, entity_type, company_id=None, page=None, limit=None, endpoint=None):
         company_id = company_id or self.company_id
+        entity_type = quote_plus(entity_type)
         endpoint = urljoin(
             endpoint or self.base_endpoint,
             f"storage/{company_id}/entitysearch/{entity_type}",
@@ -509,6 +512,7 @@ class SyphtClient(object):
     def set_entity(self, entity_id, entity_type, data, company_id=None, endpoint=None):
         company_id = company_id or self.company_id
         entity_id = quote_plus(entity_id)
+        entity_type = quote_plus(entity_type)
         endpoint = urljoin(
             endpoint or self.base_endpoint,
             f"storage/{company_id}/entity/{entity_type}/{entity_id}",
@@ -523,6 +527,7 @@ class SyphtClient(object):
     def delete_entity(self, entity_id, entity_type, company_id=None, endpoint=None):
         company_id = company_id or self.company_id
         entity_id = quote_plus(entity_id)
+        entity_type = quote_plus(entity_type)
         endpoint = urljoin(
             endpoint or self.base_endpoint,
             f"storage/{company_id}/entity/{entity_type}/{entity_id}",
@@ -550,6 +555,7 @@ class SyphtClient(object):
             raise ValueError("Expected a list of entities")
 
         company_id = company_id or self.company_id
+        entity_type = quote_plus(entity_type)
         endpoint = urljoin(
             endpoint or self.base_endpoint,
             f"storage/{company_id}/bulkentity/{entity_type}/",
@@ -573,6 +579,7 @@ class SyphtClient(object):
         exact = exact or {}
         fuzzy = fuzzy or {}
         company_id = company_id or self.company_id
+        entity_type = quote_plus(entity_type)
         endpoint = urljoin(
             endpoint or self.base_endpoint, f"storage/{company_id}/entitysearch/{entity_type}/"
         )
