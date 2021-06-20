@@ -1,8 +1,8 @@
 import json
 import os
 from base64 import b64encode
-from urllib.parse import urljoin, quote_plus
 from datetime import datetime, timedelta
+from urllib.parse import quote_plus, urljoin
 import requests
 
 SYPHT_API_BASE_ENDPOINT = "https://api.sypht.com"
