@@ -1,9 +1,8 @@
 import json
 import os
 from base64 import b64encode
+from urllib.parse import urljoin, quote_plus
 from datetime import datetime, timedelta
-from urllib.parse import urljoin
-
 import requests
 
 SYPHT_API_BASE_ENDPOINT = "https://api.sypht.com"
@@ -454,6 +453,7 @@ class SyphtClient(object):
 
     def get_entity(self, entity_id, entity_type, company_id=None, endpoint=None):
         company_id = company_id or self.company_id
+        entity_id = quote_plus(entity_id)
         endpoint = urljoin(
             endpoint or self.base_endpoint,
             f"storage/{company_id}/entity/{entity_type}/{entity_id}",
@@ -508,6 +508,7 @@ class SyphtClient(object):
 
     def set_entity(self, entity_id, entity_type, data, company_id=None, endpoint=None):
         company_id = company_id or self.company_id
+        entity_id = quote_plus(entity_id)
         endpoint = urljoin(
             endpoint or self.base_endpoint,
             f"storage/{company_id}/entity/{entity_type}/{entity_id}",
@@ -521,6 +522,7 @@ class SyphtClient(object):
 
     def delete_entity(self, entity_id, entity_type, company_id=None, endpoint=None):
         company_id = company_id or self.company_id
+        entity_id = quote_plus(entity_id)
         endpoint = urljoin(
             endpoint or self.base_endpoint,
             f"storage/{company_id}/entity/{entity_type}/{entity_id}",
