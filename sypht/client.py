@@ -138,7 +138,7 @@ class SyphtClient(object):
                 self.auth_endpoint, self.client_id, self._client_secret, audience=self.audience
             )
         else:
-            raise ValueError(f"Invalid authentication endpoint: {auth_endpoint}")
+            raise ValueError(f"Invalid authentication endpoint: {self.auth_endpoint}")
 
         self._auth_expiry = datetime.utcnow() + timedelta(seconds=expires_in)
         self._access_token = access_token
