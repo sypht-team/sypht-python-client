@@ -48,7 +48,7 @@ class SyphtClient(object):
             if not env_key:
                 raise ValueError(
                     "Missing API key configuration. Add "
-                    + f'{self.API_ENV_KEY}="<client_id>:<client_secret>" to the environment or '
+                    + f"{self.API_ENV_KEY}='<client_id>:<client_secret>' to the environment or "
                     + "directly pass client_id and client_secret parameters to the client constructor."
                 )
             elif env_key and len(key_parts) != 2:
@@ -56,7 +56,7 @@ class SyphtClient(object):
                     f"Invalid {self.API_ENV_KEY} environment variable configured. "
                     + "<client_id> and <client_secret> must be provided as a single, "
                     + "colon-separated environment variable, i.e: "
-                    + f'export {self.API_ENV_KEY}="<client_id>:<client_secret>"'
+                    + f"export {self.API_ENV_KEY}='<client_id>:<client_secret>'"
                 )
             client_id, client_secret = key_parts
 
