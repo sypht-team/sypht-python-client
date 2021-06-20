@@ -16,7 +16,7 @@ def _iter_chunked_sequence(seq, size):
         yield seq[pos : pos + size]
 
 
-class SyphtClient(object):
+class SyphtClient():
     API_ENV_KEY = "SYPHT_API_KEY"
 
     def __init__(
