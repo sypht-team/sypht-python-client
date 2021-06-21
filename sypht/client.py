@@ -2,8 +2,7 @@ import json
 import os
 from base64 import b64encode
 from datetime import datetime, timedelta
-from urllib.parse import urljoin
-
+from urllib.parse import quote_plus, urljoin
 import requests
 
 SYPHT_API_BASE_ENDPOINT = "https://api.sypht.com"
@@ -17,7 +16,7 @@ def _iter_chunked_sequence(seq, size):
         yield seq[pos : pos + size]
 
 
-class SyphtClient(object):
+class SyphtClient:
     API_ENV_KEY = "SYPHT_API_KEY"
 
     def __init__(
@@ -49,15 +48,15 @@ class SyphtClient(object):
             if not env_key:
                 raise ValueError(
                     "Missing API key configuration. Add "
-                    + f'{self.API_ENV_KEY}="<client_id>:<client_secret>" to the environment or '
+                    + f"{self.API_ENV_KEY}='<client_id>:<client_secret>' to the environment or "
                     + "directly pass client_id and client_secret parameters to the client constructor."
                 )
             elif env_key and len(key_parts) != 2:
                 raise ValueError(
-                    f"Invalid {self.API_ENV_KEY} environment variable configured. " +
-                    "<client_id> and <client_secret> must be provided as a single, " +
-                    "colon-separated environment variable, i.e: " +
-                    f'export {self.API_ENV_KEY}="<client_id>:<client_secret>"'
+                    f"Invalid {self.API_ENV_KEY} environment variable configured. "
+                    + "<client_id> and <client_secret> must be provided as a single, "
+                    + "colon-separated environment variable, i.e: "
+                    + f"export {self.API_ENV_KEY}='<client_id>:<client_secret>'"
                 )
             client_id, client_secret = key_parts
 
@@ -139,7 +138,7 @@ class SyphtClient(object):
                 self.auth_endpoint, self.client_id, self._client_secret, audience=self.audience
             )
         else:
-            raise ValueError(f"Invalid authentication endpoint: {auth_endpoint}")
+            raise ValueError(f"Invalid authentication endpoint: {self.auth_endpoint}")
 
         self._auth_expiry = datetime.utcnow() + timedelta(seconds=expires_in)
         self._access_token = access_token
@@ -454,6 +453,8 @@ class SyphtClient(object):
 
     def get_entity(self, entity_id, entity_type, company_id=None, endpoint=None):
         company_id = company_id or self.company_id
+        entity_id = quote_plus(entity_id)
+        entity_type = quote_plus(entity_type)
         endpoint = urljoin(
             endpoint or self.base_endpoint,
             f"storage/{company_id}/entity/{entity_type}/{entity_id}",
@@ -479,6 +480,7 @@ class SyphtClient(object):
             raise ValueError("Expected a list of entities")
 
         company_id = company_id or self.company_id
+        entity_type = quote_plus(entity_type)
         endpoint = urljoin(
             endpoint or self.base_endpoint,
             f"storage/{company_id}/entitysearch/{entity_type}/by_id",
@@ -492,6 +494,7 @@ class SyphtClient(object):
 
     def list_entities(self, entity_type, company_id=None, page=None, limit=None, endpoint=None):
         company_id = company_id or self.company_id
+        entity_type = quote_plus(entity_type)
         endpoint = urljoin(
             endpoint or self.base_endpoint,
             f"storage/{company_id}/entitysearch/{entity_type}",
@@ -508,6 +511,8 @@ class SyphtClient(object):
 
     def set_entity(self, entity_id, entity_type, data, company_id=None, endpoint=None):
         company_id = company_id or self.company_id
+        entity_id = quote_plus(entity_id)
+        entity_type = quote_plus(entity_type)
         endpoint = urljoin(
             endpoint or self.base_endpoint,
             f"storage/{company_id}/entity/{entity_type}/{entity_id}",
@@ -521,6 +526,8 @@ class SyphtClient(object):
 
     def delete_entity(self, entity_id, entity_type, company_id=None, endpoint=None):
         company_id = company_id or self.company_id
+        entity_id = quote_plus(entity_id)
+        entity_type = quote_plus(entity_type)
         endpoint = urljoin(
             endpoint or self.base_endpoint,
             f"storage/{company_id}/entity/{entity_type}/{entity_id}",
@@ -548,6 +555,7 @@ class SyphtClient(object):
             raise ValueError("Expected a list of entities")
 
         company_id = company_id or self.company_id
+        entity_type = quote_plus(entity_type)
         endpoint = urljoin(
             endpoint or self.base_endpoint,
             f"storage/{company_id}/bulkentity/{entity_type}/",
@@ -571,6 +579,7 @@ class SyphtClient(object):
         exact = exact or {}
         fuzzy = fuzzy or {}
         company_id = company_id or self.company_id
+        entity_type = quote_plus(entity_type)
         endpoint = urljoin(
             endpoint or self.base_endpoint, f"storage/{company_id}/entitysearch/{entity_type}/"
         )
