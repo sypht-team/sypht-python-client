@@ -509,6 +509,17 @@ class SyphtClient:
             params["limit"] = int(limit)
         return self._parse_response(self.requests.get(endpoint, headers=headers, params=params))
 
+    def get_all_entity_ids(self, entity_type, company_id=None, endpoint=None):
+        entity_ids = []
+        next_page = True
+        while next_page:
+            if next_page is True:
+                next_page = None  # first page request
+            res = self.list_entities(entity_type, company_id, page=next_page)
+            next_page = res.get("next_page")
+            entity_ids.extend([{"entity_id": entity_id} for entity_id in res.get("entities")])
+        return entity_ids
+
     def set_entity(self, entity_id, entity_type, data, company_id=None, endpoint=None):
         company_id = company_id or self.company_id
         entity_id = quote_plus(entity_id)
