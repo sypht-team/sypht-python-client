@@ -510,7 +510,15 @@ class SyphtClient:
             params["limit"] = int(limit)
         return self._parse_response(self.requests.get(endpoint, headers=headers, params=params))
 
-    def get_all_entity_ids(self, entity_type, company_id=None, endpoint=None):
+    def get_all_entity_ids(self, entity_type, verbose=True, company_id=None, endpoint=None):
+        """Get all entity_ids for specified entity_type.
+
+        Returns list of objects if verbose (by default):
+        [{"entity_id": "id_0"}, {"entity_id": "id_1"}, ...]
+
+        Returns list of entity_id if not verbose:
+        ["id_0", "id_1", ...]
+        """
         entity_ids = []
         next_page = True
         while next_page:
@@ -518,7 +526,12 @@ class SyphtClient:
                 next_page = None  # first page request
             res = self.list_entities(entity_type, company_id, page=next_page)
             next_page = res.get("next_page")
-            entity_ids.extend([{"entity_id": entity_id} for entity_id in res.get("entities")])
+            if verbose:
+                entity_ids.extend(
+                    [{"entity_id": entity_id} for entity_id in res.get("entities")]
+                )
+            else:
+                entity_ids.extend(res.get("entities"))
         return entity_ids
 
     def set_entity(self, entity_id, entity_type, data, company_id=None, endpoint=None):
