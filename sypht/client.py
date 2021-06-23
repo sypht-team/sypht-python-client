@@ -493,6 +493,7 @@ class SyphtClient:
         )
 
     def list_entities(self, entity_type, company_id=None, page=None, limit=None, endpoint=None):
+        """Get list of entity_ids by pagination."""
         company_id = company_id or self.company_id
         entity_type = quote_plus(entity_type)
         endpoint = urljoin(
