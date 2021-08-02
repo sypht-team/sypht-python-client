@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 
 import argparse
+import json
 import re
 import sys
 import textwrap
-import json
+
 from sypht.client import SyphtClient
 
 
 class Extract(object):
-    """ Extract values from a document. """
+    """Extract values from a document."""
 
     def __init__(self, path, products):
         self.path = path

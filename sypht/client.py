@@ -3,12 +3,14 @@ import os
 from base64 import b64encode
 from datetime import datetime, timedelta
 from urllib.parse import quote_plus, urljoin
+
 import requests
 
 SYPHT_API_BASE_ENDPOINT = "https://api.sypht.com"
 SYPHT_AUTH_ENDPOINT = "https://auth.sypht.com/oauth2/token"
 SYPHT_LEGACY_AUTH_ENDPOINT = "https://login.sypht.com/oauth/token"
 SYPHT_OAUTH_COMPANY_ID_CLAIM_KEY = "https://api.sypht.com/companyId"
+TOKEN_EXPIRY_BUFFER_SECONDS = 10
 
 
 def _iter_chunked_sequence(seq, size):
@@ -131,16 +133,24 @@ class SyphtClient:
     def _authenticate_client(self):
         if "/oauth/" in self.auth_endpoint:
             access_token, expires_in = self._authenticate_v1(
-                self.auth_endpoint, self.client_id, self._client_secret, audience=self.audience
+                self.auth_endpoint,
+                self.client_id,
+                self._client_secret,
+                audience=self.audience,
             )
         elif "/oauth2/" in self.auth_endpoint:
             access_token, expires_in = self._authenticate_v2(
-                self.auth_endpoint, self.client_id, self._client_secret, audience=self.audience
+                self.auth_endpoint,
+                self.client_id,
+                self._client_secret,
+                audience=self.audience,
             )
         else:
             raise ValueError(f"Invalid authentication endpoint: {self.auth_endpoint}")
 
-        self._auth_expiry = datetime.utcnow() + timedelta(seconds=expires_in)
+        self._auth_expiry = datetime.utcnow() + timedelta(
+            seconds=expires_in - TOKEN_EXPIRY_BUFFER_SECONDS
+        )
         self._access_token = access_token
 
     def _get_headers(self, **headers):
@@ -606,7 +616,8 @@ class SyphtClient:
         company_id = company_id or self.company_id
         entity_type = quote_plus(entity_type)
         endpoint = urljoin(
-            endpoint or self.base_endpoint, f"storage/{company_id}/entitysearch/{entity_type}/"
+            endpoint or self.base_endpoint,
+            f"storage/{company_id}/entitysearch/{entity_type}/",
         )
         headers = self._get_headers()
         headers["Accept"] = "application/json"
