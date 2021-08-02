@@ -10,7 +10,7 @@ SYPHT_API_BASE_ENDPOINT = "https://api.sypht.com"
 SYPHT_AUTH_ENDPOINT = "https://auth.sypht.com/oauth2/token"
 SYPHT_LEGACY_AUTH_ENDPOINT = "https://login.sypht.com/oauth/token"
 SYPHT_OAUTH_COMPANY_ID_CLAIM_KEY = "https://api.sypht.com/companyId"
-TOKEN_EXPIRY_BUFFER = 10
+TOKEN_EXPIRY_BUFFER_SECONDS = 10
 
 
 def _iter_chunked_sequence(seq, size):
@@ -149,7 +149,7 @@ class SyphtClient:
             raise ValueError(f"Invalid authentication endpoint: {self.auth_endpoint}")
 
         self._auth_expiry = datetime.utcnow() + timedelta(
-            seconds=expires_in - TOKEN_EXPIRY_BUFFER
+            seconds=expires_in - TOKEN_EXPIRY_BUFFER_SECONDS
         )
         self._access_token = access_token
 
