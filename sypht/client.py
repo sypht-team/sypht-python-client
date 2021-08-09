@@ -35,7 +35,6 @@ class SyphtClient:
         :param base_endpoint: Sypht API endpoint. Default: `https://api.sypht.com`.
         :param auth_endpoint: Sypht authentication endpoint. Default: `https://login.sypht.com/oauth/token`.
         """
-        self.requests = session if session is not None else requests.Session()
         self.base_endpoint = base_endpoint or os.environ.get(
             "SYPHT_API_BASE_ENDPOINT", SYPHT_API_BASE_ENDPOINT
         )
@@ -43,6 +42,7 @@ class SyphtClient:
         self.auth_endpoint = auth_endpoint or os.environ.get(
             "SYPHT_AUTH_ENDPOINT", SYPHT_AUTH_ENDPOINT
         )
+        self.requests = session if session is not None else self._create_session
 
         if client_id is None and client_secret is None:
             env_key = os.environ.get(self.API_ENV_KEY)
@@ -69,6 +69,10 @@ class SyphtClient:
         self._client_secret = client_secret
         self._company_id = None
         self._authenticate_client()
+
+    @property
+    def _create_session(self):
+        return requests.Session()
 
     @staticmethod
     def _authenticate_v2(endpoint, client_id, client_secret, audience):
