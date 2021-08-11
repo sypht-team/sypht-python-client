@@ -74,12 +74,11 @@ class SyphtClient:
     def _create_session(self):
         return requests.Session()
 
-    @staticmethod
-    def _authenticate_v2(endpoint, client_id, client_secret, audience):
+    def _authenticate_v2(self, endpoint, client_id, client_secret, audience):
         basic_auth_slug = b64encode((client_id + ":" + client_secret).encode("utf-8")).decode(
             "utf-8"
         )
-        result = requests.post(
+        result = self.requests.post(
             endpoint,
             headers={
                 "Accept": "application/json",
@@ -95,10 +94,9 @@ class SyphtClient:
 
         return result["access_token"], result["expires_in"]
 
-    @staticmethod
-    def _authenticate_v1(endpoint, client_id, client_secret, audience):
+    def _authenticate_v1(self, endpoint, client_id, client_secret, audience):
         endpoint = endpoint or os.environ.get("SYPHT_AUTH_ENDPOINT", SYPHT_LEGACY_AUTH_ENDPOINT)
-        result = requests.post(
+        result = self.requests.post(
             endpoint,
             data={
                 "client_id": client_id,
