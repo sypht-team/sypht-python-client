@@ -1,10 +1,10 @@
 import os
 import unittest
 import warnings
+from datetime import datetime, timedelta
+from uuid import UUID, uuid4
 
 from sypht.client import SyphtClient
-from uuid import UUID, uuid4
-from datetime import datetime, timedelta
 
 
 def validate_uuid4(uuid_string):
@@ -25,9 +25,15 @@ class DataExtraction(unittest.TestCase):
     def test_with_wrong_fieldset(self):
         with self.assertRaises(Exception) as context:
             with open("tests/sample_invoice.pdf", "rb") as f:
-                response = self.sypht_client.upload(f, ["sypht.incorrect",])
+                response = self.sypht_client.upload(
+                    f,
+                    [
+                        "sypht.incorrect",
+                    ],
+                )
                 self.assertIn(
-                    "does not have permission to use fieldSet sypht.incorrect", response["error"]
+                    "does not have permission to use fieldSet sypht.incorrect",
+                    response["error"],
                 )
 
         self.assertTrue("Request failed with status code" in str(context.exception))
@@ -61,7 +67,7 @@ class DataExtraction(unittest.TestCase):
         self.assertIn("bank.bsb", results)
 
     def test_parent_doc_id(self):
-        parent_doc_id=uuid4()
+        parent_doc_id = uuid4()
         with open("tests/sample_invoice.pdf", "rb") as f:
             fid = self.sypht_client.upload(f, ["invoices"], parent_doc_id=parent_doc_id)
             self.assertTrue(validate_uuid4(fid))
