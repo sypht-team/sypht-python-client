@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-__version__ = "0.5.11"
+__version__ = "0.5.12"
 __pkg_name__ = "sypht"
 
 setup(
@@ -16,5 +16,5 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
-    install_requires=["requests>=2.20.1,<3"],
+    install_requires=["requests>=2.26.0", "urllib3>=1.26.0"],
 )
