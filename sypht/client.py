@@ -233,6 +233,42 @@ class SyphtClient:
             )
         )
 
+    def get_validation_rules(self, company_id=None, rules_id=None, endpoint=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"workflows/rules/{company_id}/{rules_id}",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(self.requests.get(endpoint, headers=headers))
+
+    def set_validation_rules(self, validation_rules=None, schema=True, company_id=None, rules_id=None, endpoint=None):
+        data = {"data": validation_rules, "schema": schema}
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"workflows/rules/{company_id}/{rules_id}",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(
+            self.requests.put(endpoint, data=json.dumps(data), headers=headers)
+        )
+
+    def delete_validation_rules(self, company_id=None, rules_id=None, endpoint=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"workflows/rules/{company_id}/{rules_id}",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(self.requests.delete(endpoint, headers=headers))
+
     def create_file(self, file, filename=None, endpoint=None, headers=None):
         endpoint = urljoin(endpoint or self.base_endpoint, "fileupload/v2/multipart")
         headers = headers or {}
