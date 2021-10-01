@@ -75,9 +75,9 @@ class SyphtClient:
         return requests.Session()
 
     def _authenticate_v2(self, endpoint, client_id, client_secret, audience):
-        basic_auth_slug = b64encode((client_id + ":" + client_secret).encode("utf-8")).decode(
-            "utf-8"
-        )
+        basic_auth_slug = b64encode(
+            (client_id + ":" + client_secret).encode("utf-8")
+        ).decode("utf-8")
         result = self.requests.post(
             endpoint,
             headers={
@@ -95,7 +95,9 @@ class SyphtClient:
         return result["access_token"], result["expires_in"]
 
     def _authenticate_v1(self, endpoint, client_id, client_secret, audience):
-        endpoint = endpoint or os.environ.get("SYPHT_AUTH_ENDPOINT", SYPHT_LEGACY_AUTH_ENDPOINT)
+        endpoint = endpoint or os.environ.get(
+            "SYPHT_AUTH_ENDPOINT", SYPHT_LEGACY_AUTH_ENDPOINT
+        )
         result = self.requests.post(
             endpoint,
             data={
@@ -107,14 +109,19 @@ class SyphtClient:
         ).json()
 
         if result.get("error_description"):
-            raise Exception("Authentication failed: {}".format(result["error_description"]))
+            raise Exception(
+                "Authentication failed: {}".format(result["error_description"])
+            )
 
         return result["access_token"], result["expires_in"]
 
     @staticmethod
     def _parse_response(response):
         if 200 <= response.status_code < 300:
-            return response.json()
+            try:
+                return response.json()
+            except json.decoder.JSONDecodeError:
+                return response.text
         else:
             raise Exception(
                 "Request failed with status code ({}): {}".format(
@@ -211,13 +218,17 @@ class SyphtClient:
 
         if "fileId" not in result:
             raise Exception(
-                "Upload failed with response: {}".format("\n" + json.dumps(result, indent=2))
+                "Upload failed with response: {}".format(
+                    "\n" + json.dumps(result, indent=2)
+                )
             )
 
         return result["fileId"]
 
     def run_workflow(self, workflow, inputs, step=None, endpoint=None, headers=None):
-        endpoint = urljoin(endpoint or self.base_endpoint, f"workflows/{workflow}/invoke")
+        endpoint = urljoin(
+            endpoint or self.base_endpoint, f"workflows/{workflow}/invoke"
+        )
         headers = headers or {}
         headers = self._get_headers(**headers)
         return self._parse_response(
@@ -237,19 +248,26 @@ class SyphtClient:
         company_id = company_id or self.company_id
         endpoint = urljoin(
             endpoint or self.base_endpoint,
-            f"workflows/rules/{company_id}/{rules_id}",
+            f"workflows/{company_id}/rules/{rules_id}",
         )
         headers = self._get_headers()
         headers["Accept"] = "application/json"
         headers["Content-Type"] = "application/json"
         return self._parse_response(self.requests.get(endpoint, headers=headers))
 
-    def set_validation_rules(self, validation_rules=None, schema=True, company_id=None, rules_id=None, endpoint=None):
+    def set_validation_rules(
+        self,
+        validation_rules=None,
+        schema=True,
+        company_id=None,
+        rules_id=None,
+        endpoint=None,
+    ):
         data = {"data": validation_rules, "schema": schema}
         company_id = company_id or self.company_id
         endpoint = urljoin(
             endpoint or self.base_endpoint,
-            f"workflows/rules/{company_id}/{rules_id}",
+            f"workflows/{company_id}/rules/{rules_id}",
         )
         headers = self._get_headers()
         headers["Accept"] = "application/json"
@@ -262,7 +280,43 @@ class SyphtClient:
         company_id = company_id or self.company_id
         endpoint = urljoin(
             endpoint or self.base_endpoint,
-            f"workflows/rules/{company_id}/{rules_id}",
+            f"workflows/{company_id}/rules/{rules_id}",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(self.requests.delete(endpoint, headers=headers))
+
+    def get_workflow_data(self, company_id=None, data_key=None, endpoint=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"workflows/{company_id}/data/{data_key}",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(self.requests.get(endpoint, headers=headers))
+
+    def put_workflow_data(self, data, data_key, company_id=None, endpoint=None):
+        data = {"data": data}
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"workflows/{company_id}/data/{data_key}",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(
+            self.requests.put(endpoint, data=json.dumps(data), headers=headers)
+        )
+
+    def delete_workflow_data(self, rules_id=None, company_id=None, endpoint=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"workflows/{company_id}/rules/{rules_id}",
         )
         headers = self._get_headers()
         headers["Accept"] = "application/json"
@@ -286,7 +340,9 @@ class SyphtClient:
         return self._parse_response(self.requests.get(endpoint, headers=headers))
 
     def get_file_data(self, file_id, endpoint=None, headers=None):
-        endpoint = urljoin(endpoint or self.base_endpoint, f"app/docs/{file_id}/download")
+        endpoint = urljoin(
+            endpoint or self.base_endpoint, f"app/docs/{file_id}/download"
+        )
         headers = headers or {}
         headers = self._get_headers(**headers)
         response = self.requests.get(endpoint, headers=headers)
@@ -355,9 +411,13 @@ class SyphtClient:
         headers = self._get_headers()
         headers["Accept"] = "application/json"
         headers["Content-Type"] = "application/json"
-        return self._parse_response(self.requests.post(endpoint, data=body, headers=headers))
+        return self._parse_response(
+            self.requests.post(endpoint, data=body, headers=headers)
+        )
 
-    def set_company_annotations(self, doc_id, annotations, company_id=None, endpoint=None):
+    def set_company_annotations(
+        self, doc_id, annotations, company_id=None, endpoint=None
+    ):
         data = {
             "origin": "external",
             "fields": [
@@ -435,7 +495,9 @@ class SyphtClient:
         headers["Accept"] = "application/json"
         headers["Content-Type"] = "application/json"
         return self._parse_response(
-            self.requests.put(endpoint, data=json.dumps({"docs": file_ids}), headers=headers)
+            self.requests.put(
+                endpoint, data=json.dumps({"docs": file_ids}), headers=headers
+            )
         )
 
     def add_files_to_tag(self, tag, file_ids, company_id=None, endpoint=None):
@@ -448,7 +510,9 @@ class SyphtClient:
         headers["Accept"] = "application/json"
         headers["Content-Type"] = "application/json"
         return self._parse_response(
-            self.requests.patch(endpoint, data=json.dumps({"docs": file_ids}), headers=headers)
+            self.requests.patch(
+                endpoint, data=json.dumps({"docs": file_ids}), headers=headers
+            )
         )
 
     def remove_file_from_tag(self, file_id, tag, company_id=None, endpoint=None):
@@ -483,7 +547,9 @@ class SyphtClient:
         headers["Accept"] = "application/json"
         headers["Content-Type"] = "application/json"
         return self._parse_response(
-            self.requests.put(endpoint, data=json.dumps({"tags": tags}), headers=headers)
+            self.requests.put(
+                endpoint, data=json.dumps({"tags": tags}), headers=headers
+            )
         )
 
     def add_tags_to_file(self, file_id, tags, company_id=None, endpoint=None):
@@ -496,7 +562,9 @@ class SyphtClient:
         headers["Accept"] = "application/json"
         headers["Content-Type"] = "application/json"
         return self._parse_response(
-            self.requests.patch(endpoint, data=json.dumps({"tags": tags}), headers=headers)
+            self.requests.patch(
+                endpoint, data=json.dumps({"tags": tags}), headers=headers
+            )
         )
 
     def get_entity(self, entity_id, entity_type, company_id=None, endpoint=None):
@@ -540,7 +608,9 @@ class SyphtClient:
             self.requests.post(endpoint, data=json.dumps(entities), headers=headers)
         )
 
-    def list_entities(self, entity_type, company_id=None, page=None, limit=None, endpoint=None):
+    def list_entities(
+        self, entity_type, company_id=None, page=None, limit=None, endpoint=None
+    ):
         """Get list of entity_ids by pagination."""
         company_id = company_id or self.company_id
         entity_type = quote_plus(entity_type)
@@ -556,9 +626,13 @@ class SyphtClient:
             params["page"] = page
         if limit:
             params["limit"] = int(limit)
-        return self._parse_response(self.requests.get(endpoint, headers=headers, params=params))
+        return self._parse_response(
+            self.requests.get(endpoint, headers=headers, params=params)
+        )
 
-    def get_all_entity_ids(self, entity_type, verbose=True, company_id=None, endpoint=None):
+    def get_all_entity_ids(
+        self, entity_type, verbose=True, company_id=None, endpoint=None
+    ):
         """Get all entity_ids for specified entity_type.
 
         Returns list of objects if verbose (by default):
@@ -641,7 +715,9 @@ class SyphtClient:
         for batch in _iter_chunked_sequence(entities, batch_size):
             responses.append(
                 self._parse_response(
-                    self.requests.post(endpoint, data=json.dumps(batch), headers=headers)
+                    self.requests.post(
+                        endpoint, data=json.dumps(batch), headers=headers
+                    )
                 )
             )
         return responses
@@ -674,7 +750,9 @@ class SyphtClient:
         headers["Accept"] = "application/json"
         headers["Content-Type"] = "application/json"
         return self._parse_response(
-            self.requests.post(endpoint, data=json.dumps(specification), headers=headers)
+            self.requests.post(
+                endpoint, data=json.dumps(specification), headers=headers
+            )
         )
 
     def submit_task(
