@@ -114,7 +114,10 @@ class SyphtClient:
     @staticmethod
     def _parse_response(response):
         if 200 <= response.status_code < 300:
-            return response.json()
+            try:
+                return response.json()
+            except json.decoder.JSONDecodeError:
+                return response.text
         else:
             raise Exception(
                 "Request failed with status code ({}): {}".format(
@@ -237,19 +240,26 @@ class SyphtClient:
         company_id = company_id or self.company_id
         endpoint = urljoin(
             endpoint or self.base_endpoint,
-            f"workflows/rules/{company_id}/{rules_id}",
+            f"workflows/{company_id}/rules/{rules_id}",
         )
         headers = self._get_headers()
         headers["Accept"] = "application/json"
         headers["Content-Type"] = "application/json"
         return self._parse_response(self.requests.get(endpoint, headers=headers))
 
-    def set_validation_rules(self, validation_rules=None, schema=True, company_id=None, rules_id=None, endpoint=None):
+    def set_validation_rules(
+        self,
+        validation_rules=None,
+        schema=True,
+        company_id=None,
+        rules_id=None,
+        endpoint=None,
+    ):
         data = {"data": validation_rules, "schema": schema}
         company_id = company_id or self.company_id
         endpoint = urljoin(
             endpoint or self.base_endpoint,
-            f"workflows/rules/{company_id}/{rules_id}",
+            f"workflows/{company_id}/rules/{rules_id}",
         )
         headers = self._get_headers()
         headers["Accept"] = "application/json"
@@ -262,7 +272,43 @@ class SyphtClient:
         company_id = company_id or self.company_id
         endpoint = urljoin(
             endpoint or self.base_endpoint,
-            f"workflows/rules/{company_id}/{rules_id}",
+            f"workflows/{company_id}/rules/{rules_id}",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(self.requests.delete(endpoint, headers=headers))
+
+    def get_workflow_data(self, company_id=None, data_key=None, endpoint=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"workflows/{company_id}/data/{data_key}",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(self.requests.get(endpoint, headers=headers))
+
+    def put_workflow_data(self, data, data_key, company_id=None, endpoint=None):
+        data = {"data": data}
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"workflows/{company_id}/data/{data_key}",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(
+            self.requests.put(endpoint, data=json.dumps(data), headers=headers)
+        )
+
+    def delete_workflow_data(self, rules_id=None, company_id=None, endpoint=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"workflows/{company_id}/rules/{rules_id}",
         )
         headers = self._get_headers()
         headers["Accept"] = "application/json"
