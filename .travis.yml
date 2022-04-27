@@ -1,4 +1,4 @@
-dist: trusty
+dist: focal
 sudo: false
 language: python
 
@@ -18,7 +18,7 @@ deploy:
   password: $PYPI_PASSWORD
   on:
     branch: master
-    python: "3.6"
+    python: "3.9"
   provider: pypi
   distribution: "sdist bdist_wheel"
   skip_existing: true
