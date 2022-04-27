@@ -20,7 +20,9 @@ class DataExtraction(unittest.TestCase):
     def setUp(self):
         warnings.simplefilter("ignore", category=ResourceWarning)
 
-        self.sypht_client = SyphtClient(os.environ["CLIENT_ID"], os.environ["CLIENT_SECRET"])
+        self.sypht_client = SyphtClient(
+            os.environ["CLIENT_ID"], os.environ["CLIENT_SECRET"]
+        )
 
     def test_with_wrong_fieldset(self):
         with self.assertRaises(Exception) as context:
