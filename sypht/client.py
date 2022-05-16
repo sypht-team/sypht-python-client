@@ -342,14 +342,17 @@ class SyphtClient:
         headers["Content-Type"] = "application/json"
         return self._parse_response(self.requests.delete(endpoint, headers=headers))
 
-    def create_file(self, file, filename=None, endpoint=None, headers=None):
+    def create_file(self, file, filename=None, endpoint=None, headers=None, data=None):
         endpoint = urljoin(endpoint or self.base_endpoint, "fileupload/v2/multipart")
         headers = headers or {}
         headers = self._get_headers(**headers)
         if filename is not None:
             file = filename, file
+        data = data or {}
         return self._parse_response(
-            self.requests.post(endpoint, files={"file": file}, headers=headers)
+            self.requests.post(
+                endpoint, files={"file": file}, data=data, headers=headers
+            )
         )
 
     def get_file(self, file_id, endpoint=None, headers=None):
