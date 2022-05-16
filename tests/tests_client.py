@@ -19,10 +19,7 @@ def validate_uuid4(uuid_string):
 class DataExtraction(unittest.TestCase):
     def setUp(self):
         warnings.simplefilter("ignore", category=ResourceWarning)
-
-        self.sypht_client = SyphtClient(
-            os.environ["CLIENT_ID"], os.environ["CLIENT_SECRET"]
-        )
+        self.sypht_client = SyphtClient()
 
     def test_with_wrong_fieldset(self):
         with self.assertRaises(Exception) as context:

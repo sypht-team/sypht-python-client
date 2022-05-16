@@ -15,3 +15,5 @@ coverage.xml
 
 venv
 .env
+
+.direnv

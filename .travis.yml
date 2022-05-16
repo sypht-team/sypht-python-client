@@ -11,7 +11,8 @@ install:
   - pip install codecov
 
 script:
-  - echo "skipping tests"
+  - pip install pytest
+  - pytest -s tests/*.py
 
 deploy:
   user: $PYPI_USER
