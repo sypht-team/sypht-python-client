@@ -2,7 +2,7 @@ import json
 import os
 from base64 import b64encode
 from datetime import datetime, timedelta
-from urllib.parse import quote_plus, urljoin
+from urllib.parse import quote_plus, urlencode, urljoin
 
 import requests
 
@@ -378,10 +378,19 @@ class SyphtClient:
 
         return response.content
 
-    def fetch_results(self, file_id, endpoint=None, verbose=False, headers=None):
+    def fetch_results(self, file_id, timeout=None, endpoint=None, verbose=False, headers=None):
+        """
+        :param file_id: the id of the document that was uploaded and extracted
+        :param timeout: a timeout in milliseconds to wait for the results
+        """
         endpoint = urljoin(endpoint or self.base_endpoint, "result/final/" + file_id)
+        qsdict = {}
         if verbose:
-            endpoint += "?verbose=true"
+            qsdict["verbose"] = "true"
+        if timeout:
+            qsdict["timeout"] = timeout
+        qs = urlencode(qsdict)
+        endpoint += f"?{qs}" if qs else ""
         headers = headers or {}
         headers = self._get_headers(**headers)
         result = self._parse_response(self.requests.get(endpoint, headers=headers))
