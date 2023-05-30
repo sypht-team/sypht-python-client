@@ -29,6 +29,10 @@ jobs:
         pip install pytest coverage codecov
         pip install .
     - name: Test with pytest
+      env:
+        SYPHT_API_BASE_ENDPOINT: ${{ vars.SYPHT_API_BASE_ENDPOINT }}
+        SYPHT_API_KEY: ${{ secrets.SYPHT_API_KEY }}
+        SYPHT_AUTH_ENDPOINT: ${{ vars.SYPHT_AUTH_ENDPOINT }}
       run: |
         echo "vars:"
         echo $SYPHT_API_BASE_ENDPOINT
