@@ -1,0 +1,37 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Python application
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    environment: deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.9"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest coverage codecov
+        pip install .
+    - name: Test with pytest
+      env:
+        SYPHT_API_BASE_ENDPOINT: ${{ vars.SYPHT_API_BASE_ENDPOINT }}
+        SYPHT_API_KEY: ${{ secrets.SYPHT_API_KEY }}
+        SYPHT_AUTH_ENDPOINT: ${{ vars.SYPHT_AUTH_ENDPOINT }}
+      run: |
+        pytest -s tests/*.py

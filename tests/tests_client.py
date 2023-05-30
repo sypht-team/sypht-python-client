@@ -39,7 +39,7 @@ class DataExtraction(unittest.TestCase):
 
     def test_data_extraction_1(self):
         with open("tests/sample_invoice.pdf", "rb") as f:
-            fid = self.sypht_client.upload(f, ["invoices"])
+            fid = self.sypht_client.upload(f, ["invoices:2"])
             self.assertTrue(validate_uuid4(fid))
 
         results = self.sypht_client.fetch_results(fid)
