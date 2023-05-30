@@ -7,6 +7,7 @@ setup(
     name=__pkg_name__,
     version=__version__,
     description="Sypht Python Client",
+    long_description="Sypht Python Client",
     author="Sypht Pty Ltd.",
     packages=find_packages(),
     url="https://sypht.com",
