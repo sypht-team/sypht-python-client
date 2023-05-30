@@ -30,4 +30,7 @@ jobs:
         pip install .
     - name: Test with pytest
       run: |
+        echo "vars:"
+        echo $SYPHT_BASE_ENDPOINT
+        echo $SYPHT_API_KEY
         pytest -s tests/*.py
