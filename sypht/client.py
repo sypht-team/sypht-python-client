@@ -1,8 +1,9 @@
 import json
 import os
+from typing import List, Optional
 from base64 import b64encode
 from datetime import datetime, timedelta
-from urllib.parse import quote_plus, urljoin
+from urllib.parse import quote_plus, urlencode, urljoin
 
 import requests
 
@@ -378,10 +379,19 @@ class SyphtClient:
 
         return response.content
 
-    def fetch_results(self, file_id, endpoint=None, verbose=False, headers=None):
+    def fetch_results(self, file_id, timeout=None, endpoint=None, verbose=False, headers=None):
+        """
+        :param file_id: the id of the document that was uploaded and extracted
+        :param timeout: a timeout in milliseconds to wait for the results
+        """
         endpoint = urljoin(endpoint or self.base_endpoint, "result/final/" + file_id)
+        qsdict = {}
         if verbose:
-            endpoint += "?verbose=true"
+            qsdict["verbose"] = "true"
+        if timeout:
+            qsdict["timeout"] = timeout
+        qs = urlencode(qsdict)
+        endpoint += f"?{qs}" if qs else ""
         headers = headers or {}
         headers = self._get_headers(**headers)
         result = self._parse_response(self.requests.get(endpoint, headers=headers))
@@ -803,3 +813,30 @@ class SyphtClient:
         return self._parse_response(
             self.requests.post(endpoint, data=json.dumps(task), headers=headers)
         )
+
+    def add_tags_to_tasks(self, task_ids: List[str], tags: List[str], company_id: Optional[str]=None, endpoint: Optional[str]=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"app/company/{company_id}/tasks/tags/batch",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        data = {"taskIds": task_ids, "add": tags, "remove": []}
+        return self._parse_response(
+            self.requests.post(
+                endpoint, data=json.dumps(data), headers=headers
+            )
+        )
+
+    def get_tags_for_task(self, task_id: str, company_id: Optional[str]=None, endpoint: Optional[str]=None):
+        company_id = company_id or self.company_id
+        endpoint = urljoin(
+            endpoint or self.base_endpoint,
+            f"app/company/{company_id}/tasks/{task_id}/tags",
+        )
+        headers = self._get_headers()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        return self._parse_response(self.requests.get(endpoint, headers=headers))
