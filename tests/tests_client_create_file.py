@@ -11,7 +11,7 @@ class CreateFileTests(unittest.TestCase):
         with open("tests/sample_invoice.pdf", "rb") as f:
 
             response = self.sypht_client.create_file(file=("sample_invoice.pdf", f))
-            self.assertTrue(response["status"], "RECIEVED")
+            self.assertTrue(response["status"], "RECEIVED")
 
     def test_create_file_with_data(self):
         with open("tests/sample_invoice.pdf", "rb") as f:
@@ -19,7 +19,7 @@ class CreateFileTests(unittest.TestCase):
             response = self.sypht_client.create_file(
                 file=("sample_invoice.pdf", f), data={"splitState": "created_by_split"}
             )
-            self.assertTrue(response["status"], "RECIEVED")
+            self.assertTrue(response["status"], "RECEIVED")
 
 
 if __name__ == "__main__":
