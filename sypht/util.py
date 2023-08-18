@@ -1,7 +1,12 @@
-def fetch_all_pages(name: str, fetch_page, page_limit=1000):
+from typing import Any, Callable, Iterator, List
+
+
+def fetch_all_pages(
+    name: str, fetch_page: Callable[..., List[Any]], page_limit=1000
+) -> Callable[..., Iterator[List[Any]]]:
     """Returns an iterator that calls fetch_page with an offset that we increment by the number of records returned from the last call to fetch_page.  Stop if page returns empty list."""
 
-    def fetch_all_pages(*args, **kwargs):
+    def fetch_all_pages(*args, **kwargs) -> Iterator[List[Any]]:
         offset = 0
         page_count = 0
         while True:
@@ -25,5 +30,6 @@ def fetch_all_pages(name: str, fetch_page, page_limit=1000):
                 break
             offset += len(result)
             yield result
+        return None
 
     return fetch_all_pages
