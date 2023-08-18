@@ -30,6 +30,5 @@ def fetch_all_pages(
                 break
             offset += len(result)
             yield result
-        return None
 
     return fetch_all_pages
