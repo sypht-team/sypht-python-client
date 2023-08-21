@@ -449,7 +449,7 @@ class SyphtClient:
         endpoint=None,
         offset=0,
     ):
-        """Fetch a single page of annotations skipping the given offset number of annotations first.  Use get_annotations to fetch all pages."""
+        """Fetch a single page of annotations skipping the given offset number of pages first.  Use get_annotations to fetch all pages."""
         filters = ["offset=" + str(offset)]
         if doc_id is not None:
             filters.append("docId=" + doc_id)
@@ -488,7 +488,7 @@ class SyphtClient:
         return {"annotations": annotations}
 
     def _get_annotations_for_docs(self, doc_ids, endpoint=None, offset=0):
-        """Fetch a single page of annotations skipping the given offset number of annotations first.  Use get_annotations_for_docs to fetch all pages."""
+        """Fetch a single page of annotations skipping the given offset number of pages first.  Use get_annotations_for_docs to fetch all pages."""
         body = json.dumps({"docIds": doc_ids, "offset": offset})
         endpoint = urljoin(endpoint or self.base_endpoint, ("/app/annotations/search"))
         headers = self._get_headers()
