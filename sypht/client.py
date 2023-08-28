@@ -421,12 +421,11 @@ class SyphtClient:
     ):
         page_iter = fetch_all_pages(
             name="get_annotations",
-            fetch_page=lambda *args, **kwargs: self._get_annotations(*args, **kwargs)[
-                "annotations"
-            ],
+            fetch_page=lambda *args, **kwargs: self._get_annotations(*args, **kwargs),
+            get_page=lambda response: response["annotations"],
         )
         annotations = []
-        for page in page_iter(
+        for response in page_iter(
             doc_id=doc_id,
             task_id=task_id,
             user_id=user_id,
@@ -435,7 +434,7 @@ class SyphtClient:
             to_date=to_date,
             endpoint=endpoint,
         ):
-            annotations.extend(page)
+            annotations.extend(response["annotations"])
         return {"annotations": annotations}
 
     def _get_annotations(
@@ -477,14 +476,15 @@ class SyphtClient:
             name="get_annotations_for_docs",
             fetch_page=lambda *args, **kwargs: self._get_annotations_for_docs(
                 *args, **kwargs
-            )["annotations"],
+            ),
+            get_page=lambda response: response["annotations"],
         )
         annotations = []
-        for page in page_iter(
+        for response in page_iter(
             doc_ids=doc_ids,
             endpoint=endpoint,
         ):
-            annotations.extend(page)
+            annotations.extend(response["annotations"])
         return {"annotations": annotations}
 
     def _get_annotations_for_docs(self, doc_ids, endpoint=None, offset=0):

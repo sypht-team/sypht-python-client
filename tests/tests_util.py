@@ -25,6 +25,30 @@ def test_fetch_all_pages_can_fetch_one_page():
     assert results == [0, 1, 2, 3, 4]
 
 
+def test_fetch_all_pages_can_fetch_one_page_with_get_page():
+    # arrange
+    page_size = 5
+
+    def fetch_something(offset, pages=1):
+        pages0 = pages - 1
+        if offset > pages0:
+            return {"results": []}
+        start = offset * page_size
+        page = range(start, start + page_size)
+        return {"results": list(page)}
+
+    # act
+    page_iter = fetch_all_pages(
+        name="test1", fetch_page=fetch_something, get_page=lambda resp: resp["results"]
+    )
+    results = []
+    for resp in page_iter(pages=1):
+        results += resp["results"]
+
+    # assert
+    assert results == [0, 1, 2, 3, 4]
+
+
 def test_fetch_all_pages_can_fetch_several_pages():
     # arrange
     page_size = 5
