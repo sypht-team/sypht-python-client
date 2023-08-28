@@ -9,7 +9,7 @@ def fetch_all_pages(
 ) -> Callable[..., Iterator[Any]]:
     """Returns an iterator that calls fetch_page with an offset that we increment by the number of pages fetched.  Stop if page returns empty list.
 
-    :param fetch_page: the api call that takes an offset (zero-based) that fetches a page of results
+    :param fetch_page: a function that makes an api call to fetch a page of results (using zero-based offset)
     :param get_page: a function that extracts the page from the response
     """
 
