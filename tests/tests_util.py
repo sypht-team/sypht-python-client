@@ -85,7 +85,7 @@ def test_fetch_all_pages_never_ending():
             results += page
 
     # assert
-    assert "fetched more than 20000 items" in str(exc_info)
+    assert "more than the limit: 20000" in str(exc_info)
 
 
 def test_fetch_all_pages_handle_error():

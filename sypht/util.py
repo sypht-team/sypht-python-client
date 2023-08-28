@@ -10,7 +10,7 @@ def fetch_all_pages(
     """Returns an iterator that calls fetch_page with an offset that we increment by the number of pages fetched.  Stop if page returns empty list.
 
     :param fetch_page: a function that makes an api call to fetch a page of results (using zero-based offset)
-    :param get_page: a function that extracts the page from the response
+    :param get_page: a function that extracts the page from the response which should be a list
     """
 
     def fetch_all_pages(*args, **kwargs) -> Iterator[List[Any]]:
@@ -21,7 +21,7 @@ def fetch_all_pages(
             if recs > rec_limit:
                 # Don't want to DOS ourselves...
                 raise Exception(
-                    f"fetch_all_pages({name}): fetched more than {rec_limit} items.  Consider using adding or adjusting a filter to reduce the number of items fetched."
+                    f"fetch_all_pages({name}): fetched {recs} records which is more than the limit: {rec_limit} .  Consider adding or adjusting a filter to reduce the total number of items fetched."
                 )
             try:
                 response = fetch_page(
@@ -31,13 +31,13 @@ def fetch_all_pages(
                 )
             except Exception as err:
                 raise Exception(
-                    f"Failed fetching for {name} for offset={page_count - 1}"
+                    f"Failed fetching for {name} for offset={page_count - 1} (records fetched so far:{recs})"
                 ) from err
             try:
                 page = get_page(response)
             except Exception as err:
                 raise Exception(
-                    f"get_page failed to extract page from response for {name} for offset={page_count - 1}"
+                    f"get_page failed to extract page from response for {name} for offset={page_count - 1} (records fetched so far:{recs})"
                 ) from err
             if len(page) == 0:
                 break
