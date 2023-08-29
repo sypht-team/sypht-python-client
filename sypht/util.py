@@ -13,7 +13,7 @@ def fetch_all_pages(
     :param get_page: a function that extracts the page from the response which should be a list
     """
 
-    def fetch_all_pages(*args, **kwargs) -> Iterator[List[Any]]:
+    def fetch_all_pages(*args, **kwargs) -> Iterator[Any]:
         page_count = 0
         recs = 0
         while True:
