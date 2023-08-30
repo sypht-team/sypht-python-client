@@ -1,11 +1,13 @@
 import json
 import os
-from typing import List, Optional
 from base64 import b64encode
 from datetime import datetime, timedelta
+from typing import List, Optional
 from urllib.parse import quote_plus, urlencode, urljoin
 
 import requests
+
+from .util import fetch_all_pages
 
 SYPHT_API_BASE_ENDPOINT = "https://api.sypht.com"
 SYPHT_AUTH_ENDPOINT = "https://auth.sypht.com/oauth2/token"
@@ -379,7 +381,9 @@ class SyphtClient:
 
         return response.content
 
-    def fetch_results(self, file_id, timeout=None, endpoint=None, verbose=False, headers=None):
+    def fetch_results(
+        self, file_id, timeout=None, endpoint=None, verbose=False, headers=None
+    ):
         """
         :param file_id: the id of the document that was uploaded and extracted
         :param timeout: a timeout in milliseconds to wait for the results
@@ -415,7 +419,37 @@ class SyphtClient:
         to_date=None,
         endpoint=None,
     ):
-        filters = []
+        page_iter = fetch_all_pages(
+            name="get_annotations",
+            fetch_page=self._get_annotations,
+            get_page=lambda response: response["annotations"],
+        )
+        annotations = []
+        for response in page_iter(
+            doc_id=doc_id,
+            task_id=task_id,
+            user_id=user_id,
+            specification=specification,
+            from_date=from_date,
+            to_date=to_date,
+            endpoint=endpoint,
+        ):
+            annotations.extend(response["annotations"])
+        return {"annotations": annotations}
+
+    def _get_annotations(
+        self,
+        doc_id=None,
+        task_id=None,
+        user_id=None,
+        specification=None,
+        from_date=None,
+        to_date=None,
+        endpoint=None,
+        offset=0,
+    ):
+        """Fetch a single page of annotations skipping the given offset number of pages first.  Use get_annotations to fetch all pages."""
+        filters = ["offset=" + str(offset)]
         if doc_id is not None:
             filters.append("docId=" + doc_id)
         if task_id is not None:
@@ -438,7 +472,22 @@ class SyphtClient:
         return self._parse_response(self.requests.get(endpoint, headers=headers))
 
     def get_annotations_for_docs(self, doc_ids, endpoint=None):
-        body = json.dumps({"docIds": doc_ids})
+        page_iter = fetch_all_pages(
+            name="get_annotations_for_docs",
+            fetch_page=self._get_annotations_for_docs,
+            get_page=lambda response: response["annotations"],
+        )
+        annotations = []
+        for response in page_iter(
+            doc_ids=doc_ids,
+            endpoint=endpoint,
+        ):
+            annotations.extend(response["annotations"])
+        return {"annotations": annotations}
+
+    def _get_annotations_for_docs(self, doc_ids, endpoint=None, offset=0):
+        """Fetch a single page of annotations skipping the given offset number of pages first.  Use get_annotations_for_docs to fetch all pages."""
+        body = json.dumps({"docIds": doc_ids, "offset": offset})
         endpoint = urljoin(endpoint or self.base_endpoint, ("/app/annotations/search"))
         headers = self._get_headers()
         headers["Accept"] = "application/json"
@@ -814,7 +863,13 @@ class SyphtClient:
             self.requests.post(endpoint, data=json.dumps(task), headers=headers)
         )
 
-    def add_tags_to_tasks(self, task_ids: List[str], tags: List[str], company_id: Optional[str]=None, endpoint: Optional[str]=None):
+    def add_tags_to_tasks(
+        self,
+        task_ids: List[str],
+        tags: List[str],
+        company_id: Optional[str] = None,
+        endpoint: Optional[str] = None,
+    ):
         company_id = company_id or self.company_id
         endpoint = urljoin(
             endpoint or self.base_endpoint,
@@ -825,12 +880,15 @@ class SyphtClient:
         headers["Content-Type"] = "application/json"
         data = {"taskIds": task_ids, "add": tags, "remove": []}
         return self._parse_response(
-            self.requests.post(
-                endpoint, data=json.dumps(data), headers=headers
-            )
+            self.requests.post(endpoint, data=json.dumps(data), headers=headers)
         )
 
-    def get_tags_for_task(self, task_id: str, company_id: Optional[str]=None, endpoint: Optional[str]=None):
+    def get_tags_for_task(
+        self,
+        task_id: str,
+        company_id: Optional[str] = None,
+        endpoint: Optional[str] = None,
+    ):
         company_id = company_id or self.company_id
         endpoint = urljoin(
             endpoint or self.base_endpoint,
