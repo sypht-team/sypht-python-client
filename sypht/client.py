@@ -418,11 +418,13 @@ class SyphtClient:
         from_date=None,
         to_date=None,
         endpoint=None,
+        rec_limit=None,
     ):
         page_iter = fetch_all_pages(
             name="get_annotations",
             fetch_page=self._get_annotations,
             get_page=lambda response: response["annotations"],
+            rec_limit=rec_limit,
         )
         annotations = []
         for response in page_iter(
@@ -471,11 +473,12 @@ class SyphtClient:
         headers["Content-Type"] = "application/json"
         return self._parse_response(self.requests.get(endpoint, headers=headers))
 
-    def get_annotations_for_docs(self, doc_ids, endpoint=None):
+    def get_annotations_for_docs(self, doc_ids, endpoint=None, rec_limit=None):
         page_iter = fetch_all_pages(
             name="get_annotations_for_docs",
             fetch_page=self._get_annotations_for_docs,
             get_page=lambda response: response["annotations"],
+            rec_limit=rec_limit,
         )
         annotations = []
         for response in page_iter(

@@ -1,17 +1,23 @@
 from typing import Any, Callable, Iterator, List
 
+DEFAULT_REC_LIMIT = 100_000
+
 
 def fetch_all_pages(
     name: str,
     fetch_page: Callable[..., Any],
     get_page: Callable[..., List[Any]] = lambda x: x,
-    rec_limit=20000,
+    rec_limit=DEFAULT_REC_LIMIT,
 ) -> Callable[..., Iterator[Any]]:
     """Returns an iterator that calls fetch_page with an offset that we increment by the number of pages fetched.  Stop if page returns empty list.
 
     :param fetch_page: a function that makes an api call to fetch a page of results (using zero-based offset)
     :param get_page: a function that extracts the page from the response which should be a list
     """
+
+    # Enforce a default so that the loop will stop.
+    if rec_limit is None:
+        rec_limit = DEFAULT_REC_LIMIT
 
     def fetch_all_pages(*args, **kwargs) -> Iterator[Any]:
         page_count = 0

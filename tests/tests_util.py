@@ -1,6 +1,6 @@
 import pytest
 
-from sypht.util import fetch_all_pages
+from sypht.util import DEFAULT_REC_LIMIT, fetch_all_pages
 
 
 def test_fetch_all_pages_can_fetch_one_page():
@@ -85,7 +85,7 @@ def test_fetch_all_pages_never_ending():
             results += page
 
     # assert
-    assert "more than the limit: 20000" in str(exc_info)
+    assert f"more than the limit: {DEFAULT_REC_LIMIT}" in str(exc_info)
 
 
 def test_fetch_all_pages_handle_error():
