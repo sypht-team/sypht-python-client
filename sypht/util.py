@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Callable, Iterator, List
 
 DEFAULT_REC_LIMIT = 100_000
@@ -48,6 +49,9 @@ def fetch_all_pages(
             if len(page) == 0:
                 break
             recs += len(page)
+            logging.info(
+                f"fetch_all_pages({name}): fetched page {page_count} (records={recs})"
+            )
             yield response
 
     return fetch_all_pages

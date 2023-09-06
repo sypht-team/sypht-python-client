@@ -419,6 +419,7 @@ class SyphtClient:
         to_date=None,
         endpoint=None,
         rec_limit=None,
+        company_id=None,
     ):
         page_iter = fetch_all_pages(
             name="get_annotations",
@@ -435,6 +436,7 @@ class SyphtClient:
             from_date=from_date,
             to_date=to_date,
             endpoint=endpoint,
+            company_id=company_id,
         ):
             annotations.extend(response["annotations"])
         return {"annotations": annotations}
@@ -448,6 +450,7 @@ class SyphtClient:
         from_date=None,
         to_date=None,
         endpoint=None,
+        company_id=None,
         offset=0,
     ):
         """Fetch a single page of annotations skipping the given offset number of pages first.  Use get_annotations to fetch all pages."""
@@ -464,6 +467,8 @@ class SyphtClient:
             filters.append("fromDate=" + from_date)
         if to_date is not None:
             filters.append("toDate=" + to_date)
+        if company_id is not None:
+            filters.append("companyId=" + company_id)
 
         endpoint = urljoin(
             endpoint or self.base_endpoint, ("/app/annotations?" + "&".join(filters))
