@@ -38,13 +38,13 @@ def fetch_all_pages(
                 )
             except Exception as err:
                 raise Exception(
-                    f"Failed fetching for {name} for offset={page_count - 1} (records fetched so far:{recs})"
+                    f"Failed fetching for {name} for offset={page_count - 1} (page={page_count}) (records fetched so far:{recs}). Cause: {err}"
                 ) from err
             try:
                 page = get_page(response)
             except Exception as err:
                 raise Exception(
-                    f"get_page failed to extract page from response for {name} for offset={page_count - 1} (page={page_count}) (records fetched so far:{recs})"
+                    f"get_page failed to extract page from response for {name} for offset={page_count - 1} (page={page_count}) (records fetched so far:{recs}). Cause: {err}"
                 ) from err
             if len(page) == 0:
                 break
