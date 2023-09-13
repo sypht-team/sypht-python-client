@@ -6,8 +6,10 @@ from typing import List, Optional
 from urllib.parse import quote_plus, urlencode, urljoin
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util import Retry
 
-from .util import fetch_all_pages
+from sypht.util import fetch_all_pages
 
 SYPHT_API_BASE_ENDPOINT = "https://api.sypht.com"
 SYPHT_AUTH_ENDPOINT = "https://auth.sypht.com/oauth2/token"
@@ -74,8 +76,26 @@ class SyphtClient:
         self._authenticate_client()
 
     @property
+    def _retry_adapter(self):
+        retry_strategy = Retry(
+            total=None,  # set connect, read, redirect, status, other instead
+            connect=3,
+            read=3,
+            redirect=0,
+            status=3,
+            status_forcelist=[429, 502, 503, 504],
+            other=0,  # catch-all for other errors
+            allowed_methods=["GET"],
+            respect_retry_after_header=False,
+            backoff_factor=0.5,  # 0.0, 0.5, 1.0, 2.0, 4.0
+        )
+        return HTTPAdapter(max_retries=retry_strategy)
+
+    @property
     def _create_session(self):
-        return requests.Session()
+        session = requests.Session()
+        session.mount(self.base_endpoint, self._retry_adapter)
+        return session
 
     def _authenticate_v2(self, endpoint, client_id, client_secret, audience):
         basic_auth_slug = b64encode(
