@@ -28,10 +28,18 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest coverage codecov
         pip install .
+        type python
+        type pip
+        type pytest
+        pip freeze
     - name: Test with pytest
       env:
         SYPHT_API_BASE_ENDPOINT: ${{ vars.SYPHT_API_BASE_ENDPOINT }}
         SYPHT_API_KEY: ${{ secrets.SYPHT_API_KEY }}
         SYPHT_AUTH_ENDPOINT: ${{ vars.SYPHT_AUTH_ENDPOINT }}
       run: |
+        type python
+        type pip
+        type pytest
+        pip freeze
         pytest -s tests/*.py
