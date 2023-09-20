@@ -98,7 +98,7 @@ class RetryTest(unittest.TestCase):
     """Test the global retry logic works as we expect it to."""
 
     @patch.object(SyphtClient, "_authenticate_v2", return_value=("access_token", 100))
-    @patch.object(SyphtClient, "_authenticate_v1", return_value=("access)token2", 100))
+    @patch.object(SyphtClient, "_authenticate_v1", return_value=("access_token2", 100))
     @patch("urllib3.connectionpool.HTTPConnectionPool._get_conn")
     def test_it_should_eventually_fail_for_50x(
         self, getconn_mock: Mock, auth_v1: Mock, auth_v2: Mock
