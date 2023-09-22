@@ -7,6 +7,8 @@ from uuid import UUID, uuid4
 
 from sypht.client import SyphtClient
 
+from .util.mock_http_server import MockRequestHandler, MockServerSession
+
 
 def validate_uuid4(uuid_string):
     try:
@@ -99,60 +101,64 @@ class RetryTest(unittest.TestCase):
 
     @patch.object(SyphtClient, "_authenticate_v2", return_value=("access_token", 100))
     @patch.object(SyphtClient, "_authenticate_v1", return_value=("access_token2", 100))
-    @patch("urllib3.connectionpool.HTTPConnectionPool._get_conn")
-    def test_it_should_eventually_fail_for_50x(
-        self, getconn_mock: Mock, auth_v1: Mock, auth_v2: Mock
-    ):
-        """See https://stackoverflow.com/questions/66497627/how-to-test-retry-attempts-in-python-using-the-request-library ."""
-
+    def test_it_should_eventually_fail_for_50x(self, auth_v1: Mock, auth_v2: Mock):
         # arrange
-        getconn_mock.return_value.getresponse.side_effect = [
-            Mock(status=502, msg=HTTPMessage()),
-            # Retries start from here...
-            # There should be n for where Retry(status=n).
-            Mock(status=502, msg=HTTPMessage()),
-            Mock(status=503, msg=HTTPMessage()),
-            Mock(status=504, msg=HTTPMessage()),
-        ]
-        sypht_client = SyphtClient()
+        requests = []
 
-        # act / assert
-        with self.assertRaisesRegex(Exception, "Max retries exceeded") as e:
-            sypht_client.get_annotations(
-                from_date=datetime(
-                    year=2021, month=1, day=1, hour=0, minute=0, second=0
-                ).strftime("%Y-%m-%d"),
-                to_date=datetime(
-                    year=2021, month=1, day=1, hour=0, minute=0, second=0
-                ).strftime("%Y-%m-%d"),
+        def create_request_handler(*args, **kwargs):
+            response_sequences = {
+                "/app/annotations?offset=0&fromDate=2021-01-01&toDate=2021-01-01": [
+                    (502, {}),
+                    # Retries start from here...
+                    # There should be n for where Retry(status=n).
+                    (503, {}),
+                    (504, {}),
+                    (502, {}),
+                ],
+            }
+            return MockRequestHandler(
+                *args, **kwargs, requests=requests, responses=response_sequences
             )
-        assert getconn_mock.return_value.request.mock_calls == [
-            call(
-                "GET",
-                "/app/annotations?offset=0&fromDate=2021-01-01&toDate=2021-01-01",
-                body=None,
-                headers=ANY,
-            ),
-            # Retries start here...
-            call(
-                "GET",
-                "/app/annotations?offset=0&fromDate=2021-01-01&toDate=2021-01-01",
-                body=None,
-                headers=ANY,
-            ),
-            call(
-                "GET",
-                "/app/annotations?offset=0&fromDate=2021-01-01&toDate=2021-01-01",
-                body=None,
-                headers=ANY,
-            ),
-            call(
-                "GET",
-                "/app/annotations?offset=0&fromDate=2021-01-01&toDate=2021-01-01",
-                body=None,
-                headers=ANY,
-            ),
-        ]
+
+        with MockServerSession(create_request_handler) as address:
+            sypht_client = SyphtClient(base_endpoint=address)
+
+            # act / assert
+            with self.assertRaisesRegex(Exception, ".") as e:
+                sypht_client.get_annotations(
+                    from_date=datetime(
+                        year=2021, month=1, day=1, hour=0, minute=0, second=0
+                    ).strftime("%Y-%m-%d"),
+                    to_date=datetime(
+                        year=2021, month=1, day=1, hour=0, minute=0, second=0
+                    ).strftime("%Y-%m-%d"),
+                )
+
+            self.assertEqual(
+                [
+                    (
+                        "GET",
+                        "/app/annotations?offset=0&fromDate=2021-01-01&toDate=2021-01-01",
+                        {},
+                    ),
+                    (
+                        "GET",
+                        "/app/annotations?offset=0&fromDate=2021-01-01&toDate=2021-01-01",
+                        {},
+                    ),
+                    (
+                        "GET",
+                        "/app/annotations?offset=0&fromDate=2021-01-01&toDate=2021-01-01",
+                        {},
+                    ),
+                    (
+                        "GET",
+                        "/app/annotations?offset=0&fromDate=2021-01-01&toDate=2021-01-01",
+                        {},
+                    ),
+                ],
+                requests,
+            )
 
 
 if __name__ == "__main__":

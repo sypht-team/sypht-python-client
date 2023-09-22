@@ -42,4 +42,4 @@ jobs:
         type pip
         type pytest
         pip freeze
-        pytest -s tests/*.py
+        pytest -s tests/test*.py

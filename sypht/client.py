@@ -76,8 +76,9 @@ class SyphtClient:
         self._authenticate_client()
 
     @property
-    def _retry_adapter(self):
-        retry_strategy = Retry(
+    def _create_session(self):
+        session = requests.Session()
+        retries = Retry(
             total=None,  # set connect, read, redirect, status, other instead
             connect=3,
             read=3,
@@ -88,13 +89,10 @@ class SyphtClient:
             allowed_methods=["GET"],
             respect_retry_after_header=False,
             backoff_factor=0.5,  # 0.0, 0.5, 1.0, 2.0, 4.0
+            # Support manual status handling in _parse_response.
+            raise_on_status=False,
         )
-        return HTTPAdapter(max_retries=retry_strategy)
-
-    @property
-    def _create_session(self):
-        session = requests.Session()
-        session.mount(self.base_endpoint, self._retry_adapter)
+        session.mount(self.base_endpoint, HTTPAdapter(max_retries=retries))
         return session
 
     def _authenticate_v2(self, endpoint, client_id, client_secret, audience):
