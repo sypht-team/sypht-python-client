@@ -45,7 +45,11 @@ class DataExtraction(unittest.TestCase):
             fid = self.sypht_client.upload(f, ["invoices:2"])
             self.assertTrue(validate_uuid4(fid))
 
+        import json
+
+        print("<< fid", fid)
         results = self.sypht_client.fetch_results(fid)
+        print("<< results", json.dumps(results, indent=2))
 
         self.assertTrue(isinstance(results, dict))
         self.assertIn("invoice.dueDate", results)
