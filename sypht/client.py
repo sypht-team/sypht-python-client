@@ -6,8 +6,10 @@ from typing import List, Optional
 from urllib.parse import quote_plus, urlencode, urljoin
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util import Retry
 
-from .util import fetch_all_pages
+from sypht.util import fetch_all_pages
 
 SYPHT_API_BASE_ENDPOINT = "https://api.sypht.com"
 SYPHT_AUTH_ENDPOINT = "https://auth.sypht.com/oauth2/token"
@@ -75,7 +77,23 @@ class SyphtClient:
 
     @property
     def _create_session(self):
-        return requests.Session()
+        session = requests.Session()
+        retries = Retry(
+            total=None,  # set connect, read, redirect, status, other instead
+            connect=3,
+            read=3,
+            redirect=0,
+            status=3,
+            status_forcelist=[429, 502, 503, 504],
+            other=0,  # catch-all for other errors
+            allowed_methods=["GET"],
+            respect_retry_after_header=False,
+            backoff_factor=0.5,  # 0.0, 0.5, 1.0, 2.0, 4.0
+            # Support manual status handling in _parse_response.
+            raise_on_status=False,
+        )
+        session.mount(self.base_endpoint, HTTPAdapter(max_retries=retries))
+        return session
 
     def _authenticate_v2(self, endpoint, client_id, client_secret, audience):
         basic_auth_slug = b64encode(
@@ -418,11 +436,14 @@ class SyphtClient:
         from_date=None,
         to_date=None,
         endpoint=None,
+        rec_limit=None,
+        company_id=None,
     ):
         page_iter = fetch_all_pages(
             name="get_annotations",
             fetch_page=self._get_annotations,
             get_page=lambda response: response["annotations"],
+            rec_limit=rec_limit,
         )
         annotations = []
         for response in page_iter(
@@ -433,6 +454,7 @@ class SyphtClient:
             from_date=from_date,
             to_date=to_date,
             endpoint=endpoint,
+            company_id=company_id,
         ):
             annotations.extend(response["annotations"])
         return {"annotations": annotations}
@@ -446,6 +468,7 @@ class SyphtClient:
         from_date=None,
         to_date=None,
         endpoint=None,
+        company_id=None,
         offset=0,
     ):
         """Fetch a single page of annotations skipping the given offset number of pages first.  Use get_annotations to fetch all pages."""
@@ -462,6 +485,8 @@ class SyphtClient:
             filters.append("fromDate=" + from_date)
         if to_date is not None:
             filters.append("toDate=" + to_date)
+        if company_id is not None:
+            filters.append("companyId=" + company_id)
 
         endpoint = urljoin(
             endpoint or self.base_endpoint, ("/app/annotations?" + "&".join(filters))
@@ -471,11 +496,12 @@ class SyphtClient:
         headers["Content-Type"] = "application/json"
         return self._parse_response(self.requests.get(endpoint, headers=headers))
 
-    def get_annotations_for_docs(self, doc_ids, endpoint=None):
+    def get_annotations_for_docs(self, doc_ids, endpoint=None, rec_limit=None):
         page_iter = fetch_all_pages(
             name="get_annotations_for_docs",
             fetch_page=self._get_annotations_for_docs,
             get_page=lambda response: response["annotations"],
+            rec_limit=rec_limit,
         )
         annotations = []
         for response in page_iter(

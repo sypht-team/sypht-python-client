@@ -1,6 +1,6 @@
 import pytest
 
-from sypht.util import fetch_all_pages
+from sypht.util import DEFAULT_REC_LIMIT, fetch_all_pages
 
 
 def test_fetch_all_pages_can_fetch_one_page():
@@ -73,6 +73,7 @@ def test_fetch_all_pages_can_fetch_several_pages():
 
 def test_fetch_all_pages_never_ending():
     """Fail if fetch more than n pages."""
+
     # arrange
     def never_ending(*args, **kwargs):
         return [0, 1, 2]
@@ -85,7 +86,30 @@ def test_fetch_all_pages_never_ending():
             results += page
 
     # assert
-    assert "more than the limit: 20000" in str(exc_info)
+    assert f"more than the limit: {DEFAULT_REC_LIMIT}" in str(exc_info)
+
+
+def test_fetch_with_rec_limit():
+    # arrange
+    page_size = 5
+
+    def fetch_something(offset, pages=1):
+        pages0 = pages - 1
+        if offset > pages0:
+            return []
+        start = offset * page_size
+        page = range(start, start + page_size)
+        return list(page)
+
+    # act
+    page_iter = fetch_all_pages(name="test1", fetch_page=fetch_something, rec_limit=2)
+    results = []
+    with pytest.raises(Exception) as exc_info:
+        for page in page_iter():
+            results += page
+
+    # assert
+    assert f"fetched 5 records which is more than the limit: 2" in str(exc_info)
 
 
 def test_fetch_all_pages_handle_error():
