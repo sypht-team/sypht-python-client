@@ -17,5 +17,5 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
-    install_requires=["requests>=2.26.0", "urllib3>=1.26.5,<2.0.0"],
+    install_requires=["requests>=2.26.0", "urllib3>=1.26.5"],
 )
