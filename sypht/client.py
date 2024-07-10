@@ -435,6 +435,9 @@ class SyphtClient:
         specification=None,
         from_date=None,
         to_date=None,
+        last_updated_from=None,
+        last_updated_to=None,
+        state=None,
         endpoint=None,
         rec_limit=None,
         company_id=None,
@@ -453,6 +456,9 @@ class SyphtClient:
             specification=specification,
             from_date=from_date,
             to_date=to_date,
+            last_updated_from=last_updated_from,
+            last_updated_to=last_updated_to,
+            state=state,
             endpoint=endpoint,
             company_id=company_id,
         ):
@@ -467,6 +473,9 @@ class SyphtClient:
         specification=None,
         from_date=None,
         to_date=None,
+        last_updated_from=None,
+        last_updated_to=None,
+        state=None,
         endpoint=None,
         company_id=None,
         offset=0,
@@ -485,6 +494,12 @@ class SyphtClient:
             filters.append("fromDate=" + from_date)
         if to_date is not None:
             filters.append("toDate=" + to_date)
+        if last_updated_from is not None:
+            filters.append("lastUpdatedFrom=" + last_updated_from)
+        if last_updated_to is not None:
+            filters.append("lastUpdatedTo=" + last_updated_to)
+        if state is not None:
+            filters.append("state=" + state)
         if company_id is not None:
             filters.append("companyId=" + company_id)
 
